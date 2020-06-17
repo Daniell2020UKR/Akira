@@ -5,4 +5,4 @@ Source code for @TheAkiraBot
 /start - Start using the bot  
 /version - Show version  
 /yt2a - Convert Youtube video to audio  
-/setlang - Set language preference(not implemented yet)
+/setlang - Set language preference(alpha)
