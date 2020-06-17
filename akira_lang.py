@@ -1,3 +1,7 @@
+available_lang = [
+	"en",
+	"ru"
+]
 translations = {
 	"en": {
 		"akira_yt2a_download_error": "An error occurred while trying to download audio",
@@ -6,7 +10,9 @@ translations = {
 		"akira_uploading": "Uploading...",
 		"akira_start": "Hi! Im Akira",
 		"akira_noargs": "No arguments supplied",
-		"akira_version": "My version - "
+		"akira_version": "My version - ",
+		"akira_nolang": "This language is not supported yet",
+		"akira_setlang": "New language is set"
 	},
 	"ru": {
 		"akira_yt2a_download_error": "Произошла ошибка пытаясь скачать аудио",
@@ -15,6 +21,8 @@ translations = {
 		"akira_uploading": "Загружаю...",
 		"akira_start": "Привет! Я Акира",
 		"akira_noargs": "Нету агрументов",
-		"akira_version": "Моя версия - "
+		"akira_version": "Моя версия - ",
+		"akira_nolang": "Этот язык пока ещё не поддерживается",
+		"akira_setlang": "Установлен новый язык"
 	}
 }
