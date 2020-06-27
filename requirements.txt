@@ -2,3 +2,4 @@ pymongo
 telethon
 Pillow
 youtube-dl
+dnspython
