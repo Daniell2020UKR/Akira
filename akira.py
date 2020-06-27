@@ -1,126 +1,157 @@
-import os, json, tempfile, shutil, akira_lang
+import os, asyncio, pymongo, akira_lang, tempfile, shutil
+from telethon import TelegramClient, events
+from telethon.sessions import StringSession
+from telethon.tl.functions.contacts import AddContactRequest
+from telethon.tl.types import DocumentAttributeAudio
 from youtube_dl import YoutubeDL
-from telegram.ext import Updater, CommandHandler
-from telegram.ext.dispatcher import run_async
-from telegram import ChatAction, ParseMode
-from PIL import Image
+from akira_db import *
 
-akira = "1.01-alpha"
-default_settings = {"token": "", "debug": True}
+akira = '1.0-alpha'
 
-def get_lang(context):
-	try: return context.chat_data["lang"]
-	except: return "en"
+def log(text): print(f'[Akira] {text}')
 
-def is_authorized(update, context):
-	# Not yet
-	user = context.bot.get_chat_member(update.message.chat.id, update.message.from_user.id)
-	print(user)
+def get_args(event):
+    args = event.text.split(' ')
+    args.pop(0)
+    return args
 
-@run_async
-def akira_yt2a(update, context):
-	# Honestly, this function can be implemented in a better way
-	if context.args:
-		temp_dir = tempfile.mkdtemp(dir=tempfile.gettempdir())
-		args = {"format": "bestaudio[ext=m4a][filesize<?50M]/bestaudio[ext=webm][filesize<?50M]", "outtmpl": f"{temp_dir}/audio-%(id)s.%(ext)s", "noplaylist": True, "playliststart": 1, "playlistend": 20, "writethumbnail": True}
-		sent_message = update.message.reply_text(akira_lang.translations
-			[get_lang(context)]["akira_downloading"])
-		try:
-			audio_info = YoutubeDL(args).extract_info(context.args[0])
-			try:
-				if audio_info["_type"] == "playlist":
-					vid = []
-					for i in audio_info["entries"]:
-						vid.append((i["id"], i["playlist_index"] - 1))
-			except:
-				audioext = audio_info["ext"]
-		except:
-			update.message.reply_text(akira_lang.translations
-				[get_lang(context)]["akira_yt2a_download_error"])
-			sent_message.delete()
-			shutil.rmtree(temp_dir)
-			return
-		sent_message.edit_text(akira_lang.translations
-			[get_lang(context)]["akira_uploading"])
-		try:
-			try:
-				if audio_info["_type"] == "playlist":
-					for i in vid:
-						index = i[1]
-						id = i[0]
-						artist = audio_info["entries"][index]["artist"]
-						title = audio_info["entries"][index]["title"]
-						audioext = audio_info["entries"][index]["ext"]
-						if os.path.exists(f"{temp_dir}/audio-{id}.jpg"):
-							thumbext = "jpg"
-							Image.open(f"{temp_dir}/audio-{id}.jpg").convert("RGB").save(f"{temp_dir}/audio-{id}.jpg")
-						else:
-							thumbext = "webp"
-							Image.open(f"{temp_dir}/audio-{id}.webp").convert("RGB").save(f"{temp_dir}/audio-{id}.jpg")
-						update.message.reply_audio(open(f"{temp_dir}/audio-{id}.{audioext}", "rb"),
-							title=title,
-							performer=artist,
-							thumb=open(f"{temp_dir}/audio-{id}.{thumbext}", "rb"))
-			except:
-				id = audio_info["id"]
-				if os.path.exists(f"{temp_dir}/audio-{id}.jpg"):
-					thumbext = "jpg"
-					Image.open(f"{temp_dir}/audio-{id}.jpg").convert("RGB").save(f"{temp_dir}/audio-{id}.jpg")
-				else:
-					# This code is questionable
-					thumbext = "webp"
-					Image.open(f"{temp_dir}/audio-{id}.webp").convert("RGB").save(f"{temp_dir}/audio-{id}.jpg")
-				update.message.reply_audio(open(f"{temp_dir}/audio-{id}.{audioext}", "rb"),
-						title=audio_info["title"],
-						performer=audio_info["artist"],
-						thumb=open(f"{temp_dir}/audio-{id}.{thumbext}", "rb"))
-		except:
-			update.message.reply_text(akira_lang.translations
-				[get_lang(context)]["akira_yt2a_upload_error"])
-			sent_message.delete()
-			shutil.rmtree(temp_dir)
-			return
-		sent_message.delete()
-		shutil.rmtree(temp_dir)
-	else:
-		update.message.reply_text(akira_lang.translations
-			[get_lang(context)]["akira_noargs"])
+def get_lang(chat):
+    global chat_data
+    if db_find(chat_data, f'{chat.id}_lang'): return db_find(chat_data, f'{chat.id}_lang')['value']
+    else: return 'en'
 
-@run_async
-def akira_start(update, context):
-	update.message.reply_text(akira_lang.translations
-		[get_lang(context)]["akira_start"])
+log(f'Starting Akira {akira}...')
+log('Getting credentials...')
+api_id = os.getenv('API_ID') or ''
+api_hash = os.getenv('API_HASH') or ''
+mdb_host = os.getenv('MDB_HOST') or ''
+if not api_id or not api_hash or not mdb_host:
+    log('Seems like some environment variables are not set. Make sure that API_ID, API_HASH and MDB_HOST are set.')
+    exit()
 
-@run_async
-def akira_version(update, context):
-	update.message.reply_text(akira_lang.translations
-		[get_lang(context)]["akira_version"] + akira)
+log('Connecting to MongoDB server...')
+mdb_server = pymongo.MongoClient(mdb_host)['akira']
+cred_data = mdb_server['cred']
+user_data = mdb_server['user']
+chat_data = mdb_server['chat']
 
-@run_async
-def akira_setlang(update, context):
-	if context.args:
-		if context.args[0] in akira_lang.available_lang:
-			context.chat_data["lang"] = context.args[0]
-			update.message.reply_text(akira_lang.translations
-				[get_lang(context)]["akira_setlang"])
-		else:
-			update.message.reply_text(akira_lang.translations
-				[get_lang(context)]["akira_nolang"])
-	else:
-		update.message.reply_text(akira_lang.translations
-			[get_lang(context)]["akira_noargs"])
+log('Creating client entity...')
+client = TelegramClient(StringSession(db_find(cred_data, 'authkey')['value']), api_id, api_hash).start()
 
-if not os.path.exists("settings.json"):
-    with open("settings.json", "w") as settings_file:
-        settings_file.write(json.dumps(default_settings, indent=4))
+log('Removing credentials from memory for security...')
+api_id = None
+api_hash = None
+mdb_host = None
+del os.environ['API_ID'], os.environ['API_HASH'], os.environ['MDB_HOST']
+api_id = os.getenv('API_ID')
+api_hash = os.getenv('API_HASH')
+mdb_host = os.getenv('MDB_HOST')
+if api_id or api_hash or mdb_host:
+    log('Credentials are still accessible.')
+    exit()
 
-with open("settings.json", "r") as settings_file:
-    settings = json.loads(settings_file.read())
+log('Creating functions...')
+@client.on(events.NewMessage(pattern=r'\.start'))
+async def akira_start(event):
+    chat = await event.get_chat()
+    await event.reply(akira_lang.translations[get_lang(chat)]['akira_start'])
 
-updater = Updater(settings["token"], use_context=True)
-updater.dispatcher.add_handler(CommandHandler("start", akira_start))
-updater.dispatcher.add_handler(CommandHandler("yt2a", akira_yt2a))
-updater.dispatcher.add_handler(CommandHandler("version", akira_version))
-updater.dispatcher.add_handler(CommandHandler("setlang", akira_setlang))
-updater.start_polling()
-print("Akira started")
+@client.on(events.NewMessage(pattern=r'\.help'))
+async def akira_help(event):
+    chat = await event.get_chat()
+    await event.reply(akira_lang.translations[get_lang(chat)]['akira_help'])
+
+@client.on(events.NewMessage(pattern=r'\.version'))
+async def akira_version(event):
+    chat = await event.get_chat()
+    await event.reply(akira_lang.translations[get_lang(chat)]['akira_version'] + akira)
+
+@client.on(events.NewMessage(pattern=r'\.donate'))
+async def akira_donate(event):
+    chat = await event.get_chat()
+    await event.reply(akira_lang.translations[get_lang(chat)]['akira_donate'])
+
+@client.on(events.NewMessage(pattern=r'\.addme'))
+async def akira_addme(event):
+    chat = await event.get_chat()
+    sender = await event.get_sender()
+    if event.is_private:
+        await client(AddContactRequest(
+            id=sender.id,
+            first_name=sender.first_name,
+            last_name=sender.last_name or '',
+            phone=sender.phone or ''
+        ))
+        await event.reply(akira_lang.translations[get_lang(chat)]['akira_newcontact'])
+    else:
+        await event.reply(akira_lang.translations[get_lang(chat)]['akira_pmonly'])
+
+@client.on(events.NewMessage(pattern=r'\.setlang'))
+async def akira_setlang(event):
+    chat = await event.get_chat()
+    args = get_args(event)
+    if args:
+        if args[0] in akira_lang.translations.keys():
+            if db_find(chat_data, f'{chat.id}_lang'):
+                db_update(chat_data, f'{chat.id}_lang', args[0])
+                await event.reply(akira_lang.translations[get_lang(chat)]['akira_newlang'])
+            else:
+                db_insert(chat_data, f'{chat.id}_lang', args[0])
+                await event.reply(akira_lang.translations[get_lang(chat)]['akira_newlang'])
+        else:
+            await event.reply(akira_lang.translations[get_lang(chat)]['akira_nolang'])
+    else:
+        await event.reply(akira_lang.translations[get_lang(chat)]['akira_noargs'])
+
+@client.on(events.NewMessage(pattern=r'\.yt2a'))
+async def akira_yt2a(event):
+    chat = await event.get_chat()
+    args = get_args(event)
+    if args:
+        async def upload_callback(current, total):
+            uploading_string = akira_lang.translations[get_lang(chat)]['akira_uploading']
+            uploaded = round(current / 1024000, 2)
+            filesize = round(total / 1024000, 2)
+            await sent_message.edit(f'{uploading_string} {uploaded}/{filesize} MB')
+        temp_dir = tempfile.mkdtemp(dir=tempfile.gettempdir())
+        dargs = {'format': 'bestaudio[ext=m4a][filesize<?200M]', 'outtmpl': f'{temp_dir}/audio-%(id)s.%(ext)s', 'writethumbnail': True}
+        sent_message = await event.reply(akira_lang.translations[get_lang(chat)]['akira_downloading'])
+        try:
+            audio_info = YoutubeDL(dargs).extract_info(args[0])
+            id = audio_info['id']
+            if os.path.exists(f'{temp_dir}/audio-{id}.webp'):
+                thumbext = 'webp'
+            else:
+                thumbext = 'jpg'
+        except:
+            await event.reply(akira_lang.translations[get_lang(chat)]['akira_audio_download_error'])
+            await sent_message.delete()
+            shutil.rmtree(temp_dir)
+            return
+        await sent_message.edit(akira_lang.translations[get_lang(chat)]['akira_uploading'])
+        try:
+            await client.send_file(
+                chat,
+                file=open(f'{temp_dir}/audio-{id}.m4a', 'rb'),
+                thumb=open(f'{temp_dir}/audio-{id}.{thumbext}', 'rb'),
+                reply_to=event.message,
+                progress_callback=upload_callback,
+                attributes=[DocumentAttributeAudio(
+                    title=audio_info['title'],
+                    performer=audio_info['artist'],
+                    voice=True,
+                    duration=audio_info['duration']
+                )]
+            )
+        except:
+            await event.reply(akira_lang.translations[get_lang(chat)]['akira_audio_upload_error'])
+            await sent_message.delete()
+            shutil.rmtree(temp_dir)
+            return
+        await sent_message.delete()
+        shutil.rmtree(temp_dir)
+    else:
+        await event.reply(akira_lang.translations[get_lang(chat)]['akira_noargs'])
+
+log('Started.')
+client.run_until_disconnected()
