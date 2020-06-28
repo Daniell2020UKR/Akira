@@ -23,9 +23,9 @@ def get_lang(chat):
 
 log(f'Starting Akira {akira}...')
 log('Getting credentials...')
-api_id = os.getenv('API_ID') or ''
-api_hash = os.getenv('API_HASH') or ''
-mdb_host = os.getenv('MDB_HOST') or ''
+api_id = os.getenv('API_ID')
+api_hash = os.getenv('API_HASH')
+mdb_host = os.getenv('MDB_HOST')
 if not api_id or not api_hash or not mdb_host:
     log('Seems like some environment variables are not set. Make sure that API_ID, API_HASH and MDB_HOST are set.')
     exit()
@@ -109,13 +109,8 @@ async def akira_yt2a(event):
     chat = await event.get_chat()
     args = get_args(event)
     if args:
-        async def upload_callback(current, total):
-            uploading_string = akira_lang.translations[get_lang(chat)]['akira_uploading']
-            uploaded = round(current / 1024000, 2)
-            filesize = round(total / 1024000, 2)
-            await sent_message.edit(f'{uploading_string} {uploaded}/{filesize} MB')
         temp_dir = tempfile.mkdtemp(dir=tempfile.gettempdir())
-        dargs = {'format': 'bestaudio[ext=m4a][filesize<?200M]', 'outtmpl': f'{temp_dir}/audio-%(id)s.%(ext)s', 'writethumbnail': True}
+        dargs = {'format': 'bestaudio[ext=m4a][filesize<?250M]', 'outtmpl': f'{temp_dir}/audio-%(id)s.%(ext)s', 'writethumbnail': True}
         sent_message = await event.reply(akira_lang.translations[get_lang(chat)]['akira_downloading'])
         try:
             audio_info = YoutubeDL(dargs).extract_info(args[0])
@@ -136,7 +131,6 @@ async def akira_yt2a(event):
                 file=open(f'{temp_dir}/audio-{id}.m4a', 'rb'),
                 thumb=open(f'{temp_dir}/audio-{id}.{thumbext}', 'rb'),
                 reply_to=event.message,
-                progress_callback=upload_callback,
                 attributes=[DocumentAttributeAudio(
                     title=audio_info['title'],
                     performer=audio_info['artist'],
@@ -159,13 +153,8 @@ async def akira_yt2v(event):
     chat = await event.get_chat()
     args = get_args(event)
     if args:
-        async def upload_callback(current, total):
-            uploading_string = akira_lang.translations[get_lang(chat)]['akira_uploading']
-            uploaded = round(current / 1024000, 2)
-            filesize = round(total / 1024000, 2)
-            await sent_message.edit(f'{uploading_string} {uploaded}/{filesize} MB')
         temp_dir = tempfile.mkdtemp(dir=tempfile.gettempdir())
-        dargs = {'format': 'bestvideo[ext=mp4][filesize<?200M]+bestaudio[ext=m4a][filesize<?200M]', 'outtmpl': f'{temp_dir}/video-%(id)s.%(ext)s', 'writethumbnail': True}
+        dargs = {'format': 'bestvideo[ext=mp4][filesize<?250M]+bestaudio[ext=m4a][filesize<?250M]', 'outtmpl': f'{temp_dir}/video-%(id)s.%(ext)s', 'writethumbnail': True}
         sent_message = await event.reply(akira_lang.translations[get_lang(chat)]['akira_downloading'])
         try:
             video_info = YoutubeDL(dargs).extract_info(args[0])
@@ -186,7 +175,6 @@ async def akira_yt2v(event):
                 file=open(f'{temp_dir}/video-{id}.mp4', 'rb'),
                 thumb=open(f'{temp_dir}/video-{id}.{thumbext}', 'rb'),
                 reply_to=event.message,
-                progress_callback=upload_callback,
                 attributes=[DocumentAttributeVideo(
                     duration=video_info['duration'],
                     w=video_info['width'],
