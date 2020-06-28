@@ -1,5 +1,5 @@
 pymongo
 telethon
-Pillow
+Pillow==7.1.2
 youtube-dl
 dnspython
