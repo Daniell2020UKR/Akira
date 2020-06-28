@@ -205,5 +205,14 @@ if os.getenv('PORT'):
         HTTPServer(('0.0.0.0', int(os.getenv('PORT'))), Binder).serve_forever()
     threading.Thread(target=heroku_binder).start()
 
+@client.on(events.NewMessage(pattern='/yt2a'))
+async def akira_donate(event):
+    await event.reply('The /yt2a is deprecated, please use .yt2a')
+
+@client.on(events.NewMessage(pattern='/start'))
+async def akira_donate(event):
+    await event.reply('The /start is deprecated, please use .start')
+
+
 log('Started.')
 client.run_until_disconnected()
