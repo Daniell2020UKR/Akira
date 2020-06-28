@@ -1,10 +1,11 @@
-import os, asyncio, pymongo, akira_lang, tempfile, shutil
+import os, asyncio, pymongo, akira_lang, tempfile, shutil, threading
 from telethon import TelegramClient, events
 from telethon.sessions import StringSession
 from telethon.tl.functions.contacts import AddContactRequest
 from telethon.tl.types import DocumentAttributeAudio
 from youtube_dl import YoutubeDL
 from akira_db import *
+from http.server import BaseHTTPRequestHandler, HTTPServer
 
 akira = '1.0-alpha'
 
@@ -152,6 +153,19 @@ async def akira_yt2a(event):
         shutil.rmtree(temp_dir)
     else:
         await event.reply(akira_lang.translations[get_lang(chat)]['akira_noargs'])
+
+
+if os.getenv('PORT'):
+    log('Heroku detected, binding PORT...')
+    def heroku_binder():
+        class Binder(BaseHTTPRequestHandler):
+            def do_GET(self):
+                self.send_response(200)
+                self.send_header('Content-type', 'text/html')
+                self.end_headers()
+                self.wfile.write('Akira on Heroku!'.encode('utf-8'))
+        HTTPServer(('0.0.0.0', int(os.getenv('PORT'))), Binder).serve_forever()
+    threading.Thread(target=heroku_binder).start()
 
 log('Started.')
 client.run_until_disconnected()
