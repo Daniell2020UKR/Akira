@@ -1,1 +1,1 @@
-web: pypy akira.py
+web: pypy3 akira.py
