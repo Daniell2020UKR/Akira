@@ -2,7 +2,7 @@ import os, asyncio, pymongo, akira_lang, tempfile, shutil, threading
 from telethon import TelegramClient, events
 from telethon.sessions import StringSession
 from telethon.tl.functions.contacts import AddContactRequest
-from telethon.tl.types import DocumentAttributeAudio
+from telethon.tl.types import DocumentAttributeAudio, DocumentAttributeVideo
 from youtube_dl import YoutubeDL
 from akira_db import *
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -154,6 +154,56 @@ async def akira_yt2a(event):
     else:
         await event.reply(akira_lang.translations[get_lang(chat)]['akira_noargs'])
 
+@client.on(events.NewMessage(pattern=r'\.yt2v'))
+async def akira_yt2v(event):
+    chat = await event.get_chat()
+    args = get_args(event)
+    if args:
+        async def upload_callback(current, total):
+            uploading_string = akira_lang.translations[get_lang(chat)]['akira_uploading']
+            uploaded = round(current / 1024000, 2)
+            filesize = round(total / 1024000, 2)
+            await sent_message.edit(f'{uploading_string} {uploaded}/{filesize} MB')
+        temp_dir = tempfile.mkdtemp(dir=tempfile.gettempdir())
+        dargs = {'format': 'bestvideo[ext=mp4][filesize<?200M]+bestaudio[ext=m4a][filesize<?200M]', 'outtmpl': f'{temp_dir}/video-%(id)s.%(ext)s', 'writethumbnail': True}
+        sent_message = await event.reply(akira_lang.translations[get_lang(chat)]['akira_downloading'])
+        try:
+            video_info = YoutubeDL(dargs).extract_info(args[0])
+            id = video_info['id']
+            if os.path.exists(f'{temp_dir}/video-{id}.webp'):
+                thumbext = 'webp'
+            else:
+                thumbext = 'jpg'
+        except:
+            await event.reply(akira_lang.translations[get_lang(chat)]['akira_audio_download_error'])
+            await sent_message.delete()
+            shutil.rmtree(temp_dir)
+            return
+        await sent_message.edit(akira_lang.translations[get_lang(chat)]['akira_uploading'])
+        try:
+            await client.send_file(
+                chat,
+                file=open(f'{temp_dir}/video-{id}.mp4', 'rb'),
+                thumb=open(f'{temp_dir}/video-{id}.{thumbext}', 'rb'),
+                reply_to=event.message,
+                progress_callback=upload_callback,
+                attributes=[DocumentAttributeVideo(
+                    duration=video_info['duration'],
+                    w=video_info['width'],
+                    h=video_info['height'],
+                    round_message=False,
+                    supports_streaming=True
+                )]
+            )
+        except:
+            await event.reply(akira_lang.translations[get_lang(chat)]['akira_audio_upload_error'])
+            await sent_message.delete()
+            shutil.rmtree(temp_dir)
+            return
+        await sent_message.delete()
+        shutil.rmtree(temp_dir)
+    else:
+        await event.reply(akira_lang.translations[get_lang(chat)]['akira_noargs'])
 
 if os.getenv('PORT'):
     log('Heroku detected, binding PORT...')
