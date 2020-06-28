@@ -1,6 +1,6 @@
 translations = {
     'en': {
-        'akira_start': 'Hi! I\'m Akira.',
+        'akira_start': 'Hi! I\'m Akira. Type \".help\" to get a list of commands.',
         'akira_noargs': 'No arguments.',
         'akira_version': 'My version - ',
         'akira_nolang': 'This language is not supported.',
@@ -21,7 +21,7 @@ translations = {
             '.version - Akira version.'
     },
     'ru': {
-        'akira_start': 'Привет! Я Акира.',
+        'akira_start': 'Привет! Я Акира. Напишите \".help\" чтобы получить список команд.',
         'akira_noargs': 'Нету агрументов.',
         'akira_version': 'Моя версия - ',
         'akira_nolang': 'Этот язык не поддерживается.',
