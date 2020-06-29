@@ -7,7 +7,7 @@ from youtube_dl import YoutubeDL
 from akira_db import *
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
-akira = '1.0-alpha'
+akira = '0.2-alpha'
 
 def log(text): print(f'[Akira] {text}')
 
@@ -21,7 +21,7 @@ def get_lang(chat):
     if db_find(chat_data, f'{chat.id}_lang'): return db_find(chat_data, f'{chat.id}_lang')['value']
     else: return 'en'
 
-log(f'Starting Akira {akira}...')
+log(f'Starting {akira}...')
 log('Getting credentials...')
 api_id = os.getenv('API_ID')
 api_hash = os.getenv('API_HASH')
@@ -67,25 +67,15 @@ async def akira_version(event):
     chat = await event.get_chat()
     await event.reply(akira_lang.translations[get_lang(chat)]['akira_version'] + akira)
 
+@client.on(events.NewMessage(pattern=r'\.changelog'))
+async def akira_changelog(event):
+    chat = await event.get_chat()
+    await event.reply(akira_lang.translations[get_lang(chat)]['akira_changelog'])
+
 @client.on(events.NewMessage(pattern=r'\.donate'))
 async def akira_donate(event):
     chat = await event.get_chat()
     await event.reply(akira_lang.translations[get_lang(chat)]['akira_donate'])
-
-@client.on(events.NewMessage(pattern=r'\.addme'))
-async def akira_addme(event):
-    chat = await event.get_chat()
-    sender = await event.get_sender()
-    if event.is_private:
-        await client(AddContactRequest(
-            id=sender.id,
-            first_name=sender.first_name,
-            last_name=sender.last_name or '',
-            phone=sender.phone or ''
-        ))
-        await event.reply(akira_lang.translations[get_lang(chat)]['akira_newcontact'])
-    else:
-        await event.reply(akira_lang.translations[get_lang(chat)]['akira_pmonly'])
 
 @client.on(events.NewMessage(pattern=r'\.setlang'))
 async def akira_setlang(event):
@@ -104,7 +94,7 @@ async def akira_setlang(event):
     else:
         await event.reply(akira_lang.translations[get_lang(chat)]['akira_noargs'])
 
-@client.on(events.NewMessage(pattern=r'\.yt2a'))
+@client.on(events.NewMessage(pattern=r'\.y2a'))
 async def akira_yt2a(event):
     chat = await event.get_chat()
     args = get_args(event)
@@ -148,7 +138,7 @@ async def akira_yt2a(event):
     else:
         await event.reply(akira_lang.translations[get_lang(chat)]['akira_noargs'])
 
-@client.on(events.NewMessage(pattern=r'\.yt2v'))
+@client.on(events.NewMessage(pattern=r'\.y2v'))
 async def akira_yt2v(event):
     chat = await event.get_chat()
     args = get_args(event)
