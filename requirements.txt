@@ -1,6 +1,4 @@
-pymongo==3.10.1
-telethon==1.14.0
 Pillow==7.2.0
-youtube-dl==2020.6.16.1
-dnspython==1.16.0
-python-telegram-bot==12.8
+aiohttp==3.6.2
+pyOpenSSL==19.1.0
+qrcode==6.1

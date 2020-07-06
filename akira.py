@@ -1,7 +1,7 @@
 import os, asyncio, random, qrcode, tempfile, shutil, uuid
 from nanogram import Nanogram
 
-akira = '1.0'
+akira = '0.1'
 
 akira_emotion_list = [
 	'CAACAgEAAxkBAAIFOV8DEObNjlBhpCutq4wXnqbrfjyiAAKxcgACrxliB5TVrEn25LatGgQ', # Happy
