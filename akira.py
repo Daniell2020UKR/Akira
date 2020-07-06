@@ -1,85 +1,72 @@
-import os, asyncio, tempfile, shutil
-from telethon import TelegramClient, events
-from telethon.sessions import MemorySession
-from telethon.tl.types import DocumentAttributeAudio, DocumentAttributeVideo
-from telegram.ext import Updater
-from youtube_dl import YoutubeDL
+import os, asyncio, random, qrcode, tempfile, shutil, uuid
+from nanogram import Nanogram
 
-akira = '1.0.0-alpha'
+akira = '1.0'
+
+akira_emotion_list = [
+	'CAACAgEAAxkBAAIFOV8DEObNjlBhpCutq4wXnqbrfjyiAAKxcgACrxliB5TVrEn25LatGgQ', # Happy
+	'CAACAgEAAxkBAAIFOl8DEPRjVNUR-yHQiZqQb3l44N1SAAKycgACrxliB51RDc5Wr2auGgQ', # "Heya!" sticker
+	'CAACAgEAAxkBAAIFO18DEQucDJDuoPXtTld5aHhNgZKiAAKzcgACrxliB8RVY-WhFab7GgQ', # Sad
+	'CAACAgEAAxkBAAIFPF8DERvXwj1MFYl8mIQjGy5AkJOkAAK0cgACrxliBw27i49II75TGgQ', # Excited
+	'CAACAgEAAxkBAAIFPV8DEWMj0anyldeCkqH-vKcQLspIAAK1cgACrxliBz_n4xaSDXdsGgQ', # Confused
+	'CAACAgEAAxkBAAIFPl8DEXari6m0XAmsZnQTJUZZrs7pAAK2cgACrxliB0Nvze67_rYGGgQ', # Blushing
+	'CAACAgEAAxkBAAIFP18DEY8mTCzF91HUtqY1guH4ZJQEAAK3cgACrxliBygb2swZUQI_GgQ', # Extremly blushing
+	'CAACAgEAAxkBAAIFQF8DEai-DSojPkooTXYBW2JYH8lpAAK4cgACrxliB6lN16aqL4XTGgQ', # Yawn
+	'CAACAgEAAxkBAAIFQV8DEb5GbCBRaXCpLVOBHLGh18FAAAK5cgACrxliB7KwP472kZ29GgQ', # Annoyed
+	'CAACAgEAAxkBAAIFQl8DEdOosPJ16inmoF-dAAGWPvC5lQACM3wAAq8ZYgcNwiff8AmGtxoE', # A N G E R Y
+	'CAACAgEAAxkBAAIFQ18DEeW8Tm9FKBF-stW_duOdgVIJAAK6cgACrxliB3-dKoMlIhFWGgQ' # Confident
+]
 
 def log(text): print(f'[Akira] {text}')
-
-def get_args(event):
-    args = event.text.split(' ')
-    args.pop(0)
-    return args
 
 log(f'Starting Akira {akira}...')
 
 log('Creating bot client...')
-client = TelegramClient(MemorySession(), os.environ.get('API_ID'), os.environ.get('API_HASH')).start(bot_token=os.environ.get('BOT_TOKEN'))
-updater = Updater(os.environ.get('BOT_TOKEN'), use_context=True)
-updater.start_webhook(listen='0.0.0.0', port=os.environ.get('PORT'), url_path=os.environ.get('BOT_TOKEN'))
-updater.bot.set_webhook(os.environ.get('URL') + '/' + os.environ.get('BOT_TOKEN'))
+bot = Nanogram(os.environ.get('BOT_TOKEN'))
 
-log('Creating functions...')
-@client.on(events.NewMessage(pattern='/start'))
-async def akira_start(event):
-    await event.reply('Hi! Im Akira.')
+log('Creating temporary directory...')
+temp_dir = tempfile.gettempdir() + '/akira'
+if os.path.exists(temp_dir):
+	shutil.rmtree(temp_dir)
+os.mkdir(temp_dir)
 
-@client.on(events.NewMessage(pattern='/help'))
-async def akira_help(event):
-    await event.reply('Help is currently unavailable.')
+async def akira_emotion(bot, update):
+	index = random.randint(0, len(akira_emotion_list) - 1)
+	await bot.send_sticker(
+		akira_emotion_list[index],
+		chat_id=update['message']['chat']['id'],
+		reply_to_message_id=update['message']['message_id']
+	)
 
-@client.on(events.NewMessage(pattern='/version'))
-async def akira_version(event):
-    await event.reply(f'My version - {akira}.')
-
-@client.on(events.NewMessage(pattern='/donate'))
-async def akira_donate(event):
-    await event.reply('Donate - @Myst33dDonate')
-
-@client.on(events.NewMessage(pattern='/yt2a'))
-async def akira_yt2a(event):
-	args = get_args(event)
-	if args:
-		temp_dir = tempfile.mkdtemp(dir=tempfile.gettempdir())
-		dargs = {'format': 'bestaudio[ext=m4a][filesize<?250M]', 'outtmpl': f'{temp_dir}/audio-%(id)s.%(ext)s', 'writethumbnail': True}
-		sent_message = await event.reply('Downloading...')
-		try:
-			audio_info = YoutubeDL(dargs).extract_info(args[0])
-			id = audio_info['id']
-			if os.path.exists(f'{temp_dir}/audio-{id}.webp'): thumbext = 'webp'
-			else: thumbext = 'jpg'
-		except:
-			await event.reply('Download error.')
-			await sent_message.delete()
-			shutil.rmtree(temp_dir)
-			return
-		await sent_message.edit('Uploading...')
-		try:
-			audio_file = await client.upload_file(open(f'{temp_dir}/audio-{id}.m4a', 'rb'))
-			await client.send_file(
-				event.chat,
-				audio_file,
-				thumb=open(f'{temp_dir}/audio-{id}.{thumbext}', 'rb'),
-				reply_to=event.message,
-				attributes=[DocumentAttributeAudio(
-					title=audio_info['title'],
-					performer=audio_info['artist'],
-					voice=True,
-					duration=audio_info['duration']
-				)]
-			)
-		except:
-			await event.reply('Upload error.')
-			await sent_message.delete()
-			shutil.rmtree(temp_dir)
-			return
-		await sent_message.delete()
-		shutil.rmtree(temp_dir)	
+async def akira_qr(bot, update):
+	if update['message']['args']:
+		qrid = uuid.uuid4()
+		qr = qrcode.make(' '.join(update['message']['args']))
+		qr.save(f'{temp_dir}/qr-{qrid}.jpg')
+		await bot.send_photo(
+			open(f'{temp_dir}/qr-{qrid}.jpg', 'rb'),
+			chat_id=update['message']['chat']['id'],
+			reply_to_message_id=update['message']['message_id']
+		)
+		os.remove(f'{temp_dir}/qr-{qrid}.jpg')
 	else:
-		await event.reply('No arguments supplied.')
+		await bot.send_message(
+			'No arguments.',
+			chat_id=update['message']['chat']['id'],
+			reply_to_message_id=update['message']['message_id']
+		)
 
+async def akira_start(bot, update):
+	await bot.send_message(
+		'Hi! Im Akira.',
+		chat_id=update['message']['chat']['id'],
+		reply_to_message_id=update['message']['message_id']
+	)
+
+bot.add_command('/emotion', akira_emotion)
+bot.add_command('/start', akira_start)
+bot.add_command('/qr', akira_qr)
+bot.delete_webhook()
+bot.set_webhook(os.environ.get('URL'), os.environ.get('PORT'))
 log('Started.')
-client.run_until_disconnected()
+bot.start_webhook()
