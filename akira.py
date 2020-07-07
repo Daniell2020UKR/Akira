@@ -60,6 +60,12 @@ async def akira_qr(bot, update):
 					reply_to_message_id=update['message']['message_id']
 				)
 			os.remove(file_path)
+		else:
+			await bot.send_message(
+				text='No photo found',
+				chat_id=update['message']['chat']['id'],
+				reply_to_message_id=update['message']['message_id']
+			)
 	elif update['message']['args']:
 		qrid = uuid.uuid4()
 		qr = qrcode.make(' '.join(update['message']['args']))
