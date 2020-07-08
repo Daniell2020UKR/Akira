@@ -207,6 +207,7 @@ async def akira_weather(bot, update):
 			try:
 				country = weather_data['sys']['country']
 				condition = weather_data['weather'][0]['main']
+				condition_description = weather_data['weather'][0]['description']
 				city = weather_data['name']
 				temp = weather_data['main']['temp']
 				max_temp = weather_data['main']['temp_max']
@@ -223,7 +224,7 @@ async def akira_weather(bot, update):
 				return
 			await bot.send_message(
 				text=f'=== {country}, {city} ===\n'
-				f'Condition: {condition}\n'
+				f'Condition: {condition}, {condition_description}\n'
 				f'Humidity: {humidity}%\n'
 				f'Wind speed: {wind_speed} m/s\n\n'
 				f'=== Temperature ===\n'
