@@ -197,9 +197,60 @@ async def akira_start(bot, update):
 		reply_to_message_id=update['message']['message_id']
 	)
 
+async def akira_weather(bot, update):
+	if update['message']['args']:
+		if os.environ.get('OWM_API_KEY'):
+			api_key = os.environ.get('OWM_API_KEY')
+			location = ' '.join(update['message']['args'])
+			async with bot.session.get(f'https://api.openweathermap.org/data/2.5/weather?q={location}&units=metric&appid={api_key}') as response:
+				weather_data = await response.json()
+			try:
+				country = weather_data['sys']['country']
+				condition = weather_data['weather'][0]['main']
+				city = weather_data['name']
+				temp = weather_data['main']['temp']
+				max_temp = weather_data['main']['temp_max']
+				min_temp = weather_data['main']['temp_min']
+				feel_temp = weather_data['main']['feels_like']
+				wind_speed = weather_data['wind']['speed']
+				humidity = weather_data['main']['humidity']
+			except:
+				await bot.send_message(
+					text='An error occurred while trying to get weather data.',
+					chat_id=update['message']['chat']['id'],
+					reply_to_message_id=update['message']['message_id']
+				)
+				return
+			await bot.send_message(
+				text=f'=== {country}, {city} ===\n'
+				f'Condition: {condition}\n'
+				f'Humidity: {humidity}%\n'
+				f'Wind speed: {wind_speed} m/s\n\n'
+				f'=== Temperature ===\n'
+				f'Current: {temp} °C\n'
+				f'Feels like: {feel_temp} °C\n'
+				f'Max: {max_temp} °C\n'
+				f'Min: {min_temp} °C\n',
+				chat_id=update['message']['chat']['id'],
+				reply_to_message_id=update['message']['message_id']
+			)
+		else:
+			await bot.send_message(
+				text='No OpenWeatherMap API key is found.',
+				chat_id=update['message']['chat']['id'],
+				reply_to_message_id=update['message']['message_id']
+			)
+	else:
+		await bot.send_message(
+			text='No arguments.',
+			chat_id=update['message']['chat']['id'],
+			reply_to_message_id=update['message']['message_id']
+		)
+
 bot.add_command('/start', akira_start)
 bot.add_command('/qr', akira_qr)
 bot.add_command('/yt2a', akira_yt2a)
+bot.add_command('/weather', akira_weather)
 bot.delete_webhook()
 bot.set_webhook(os.environ.get('URL'), os.environ.get('PORT'), heroku=True)
 log('Started.')
