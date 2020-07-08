@@ -224,7 +224,7 @@ async def akira_weather(bot, update):
 				return
 			await bot.send_message(
 				text=f'=== {country}, {city} ===\n'
-				f'Condition: {condition}, {condition_description}\n'
+				f'Condition: {condition}({condition_description})\n'
 				f'Humidity: {humidity}%\n'
 				f'Wind speed: {wind_speed} m/s\n\n'
 				f'=== Temperature ===\n'
