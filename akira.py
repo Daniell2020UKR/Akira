@@ -18,7 +18,6 @@ async def akira_start(event):
 async def main():
 	log(f"Starting Akira {akira}...")
 	log("Creating bot client...")
-	client = TelegramClient(MemorySession(), os.environ.get("API_ID"), os.environ.get("API_HASH")).start(bot_token=os.environ.get("BOT_TOKEN"))
 	bot = Bot(token=os.environ.get("BOT_TOKEN"))
 	dp = Dispatcher(bot, storage=MemoryStorage())
 
@@ -35,5 +34,6 @@ async def main():
 	)
 
 if __name__ == "__main__":
+	client = TelegramClient(MemorySession(), os.environ.get("API_ID"), os.environ.get("API_HASH")).start(bot_token=os.environ.get("BOT_TOKEN"))
 	loop = asyncio.get_event_loop()
 	loop.run_until_complete(main())
