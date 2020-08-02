@@ -27,11 +27,21 @@ async def akira_ipfs(message: types.Message):
 	if telethon_message.reply_to_msg_id:
 		telethon_reply_message = await client.get_messages(chat, ids=telethon_message.reply_to_msg_id)
 		reply = await message.reply("Downloading...")
-		downloaded_file = await telethon_reply_message.download_media(temp_dir)
+		try:
+			downloaded_file = await telethon_reply_message.download_media(temp_dir)
+		except:
+			await reply.delete()
+			await message.reply("An error occurred while downloading a file.")
+			return
 		await reply.edit_text("Uploading...")
-		response = requests.post("https://ipfsupload.herokuapp.com/upload", files={"file": open(downloaded_file, "rb")})
+		try:
+			response = requests.post("https://ipfsupload.herokuapp.com/upload", files={"file": open(downloaded_file, "rb")})
+		except:
+			await reply.delete()
+			await message.reply("An error occurred while uploading a file.")
+			return
 		await reply.delete()
-		await message.reply(response.text)
+		await message.reply(f"https://ipfs.io/ipfs/{response.text}")
 	else:
 		await message.reply("Please respond to a message with a file.")
 	shutil.rmtree(temp_dir)
