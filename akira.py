@@ -11,7 +11,7 @@ def log(text): print(f"[Akira] {text}")
 class Akira(TelegramClient):
 	async def connect(self):
 		await super().connect()
-		await client.catch_up()
+		await self.catch_up()
 
 client = Akira(MemorySession(), os.environ.get("API_ID"), os.environ.get("API_HASH")).start(bot_token=os.environ.get("BOT_TOKEN"))
 
