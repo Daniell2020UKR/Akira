@@ -19,12 +19,11 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 async def akira_start(message: types.Message):
 	await message.reply("Hi! Im Akira.")
 	chat = await client.get_entity(message.chat.username)
-	print(chat)
 	result = await client.get_messages(chat, ids=message.message_id)
-	print(result)
 	if result.reply_to_msg_id:
 		rmsg = await client.get_messages(chat, ids=result.reply_to_msg_id)
-		print(rmsg)
+		dfile = await rmsg.download_media("/tmp")
+		print(dfile)
 	
 if __name__ == "__main__":
 	log(f"Starting Akira {akira}...")
