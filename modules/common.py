@@ -16,5 +16,5 @@ async def akira_ipfs(message: types.Message):
 
 def register():
 	dp.register_message_handler(akira_start, commands=["start"], run_task=True)
-	dp.register_message_handler(akira_start, commands=["yt2a"], run_task=True)
-	dp.register_message_handler(akira_start, commands=["ipfs"], run_task=True)
+	dp.register_message_handler(akira_yt2a, commands=["yt2a"], run_task=True)
+	dp.register_message_handler(akira_ipfs, commands=["ipfs"], run_task=True)
