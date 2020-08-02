@@ -19,7 +19,7 @@ async def main():
 	log(f"Starting Akira {akira}...")
 
 	# Dummy webhook
-	updater = Updater(os.environ.get("BOT_TOKEN"))
+	updater = Updater(os.environ.get("BOT_TOKEN"), use_context=True)
 	updater.start_webhook(listen="0.0.0.0", port=os.environ.get("PORT"), url_path=os.environ.get("BOT_TOKEN"))
 	updater.bot.set_webhook(os.environ.get("URL") + "/" + os.environ.get("BOT_TOKEN"))
 
