@@ -3,7 +3,7 @@ from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
 from aiogram.utils.executor import start_webhook
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from telethon.functions.channels import GetMessagesRequest
+from telethon.tl.functions.channels import GetMessagesRequest
 from telethon.sessions import MemorySession
 from telethon.utils import get_message_id
 from telethon import TelegramClient
