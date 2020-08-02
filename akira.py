@@ -248,10 +248,21 @@ async def akira_weather(bot, update):
 			reply_to_message_id=update['message']['message_id']
 		)
 
+async def akira_ipfs(bot, update):
+	if update['message']['args']:
+		print(update['message'])
+	else:
+		await bot.send_message(
+			text='No arguments.',
+			chat_id=update['message']['chat']['id'],
+			reply_to_message_id=update['message']['message_id']
+		)
+
 bot.add_command('/start', akira_start)
 bot.add_command('/qr', akira_qr)
 bot.add_command('/yt2a', akira_yt2a)
 bot.add_command('/weather', akira_weather)
+bot.add_command('/ipfs', akira_ipfs)
 bot.delete_webhook()
 bot.set_webhook(os.environ.get('URL'), os.environ.get('PORT'), heroku=True)
 log('Started.')
