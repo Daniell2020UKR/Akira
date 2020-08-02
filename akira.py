@@ -17,10 +17,11 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 
 @dp.message_handler(commands=["start"], run_task=True)
 async def akira_start(message: types.Message):
-	#tmsg = await get_message_id(message.message_id)
-	#print(tmsg)
 	await message.reply("Hi! Im Akira.")
-
+	print(message)
+	tmsg = await get_message_id(message.message_id)
+	print(tmsg)
+	
 if __name__ == "__main__":
 	log(f"Starting Akira {akira}...")
 
