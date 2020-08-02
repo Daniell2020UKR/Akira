@@ -1,6 +1,5 @@
 import os, asyncio
-from aiohttp import web
-from aiogram import Bot
+from telegram.ext import Updater
 from telethon.sessions import MemorySession
 from telethon.tl.types import DocumentAttributeAudio
 from telethon import TelegramClient, events
@@ -18,14 +17,11 @@ async def akira_start(event):
 
 async def main():
 	log(f"Starting Akira {akira}...")
-	bot = Bot(token=os.environ.get("BOT_TOKEN"))
 
 	# Dummy webhook
-	await bot.set_webhook(os.environ.get("URL") + "/" + os.environ.get("BOT_TOKEN"))
-	async def webhook(request): return web.Response(text="ACK")
-	app = web.Application()
-	app.router.add_post("/" + os.environ.get("BOT_TOKEN"), webhook)
-	web.run_app(app, port=os.environ.get("PORT"))
+	updater = Updater(os.environ.get("BOT_TOKEN"))
+	updater.start_webhook(listen="0.0.0.0", port=os.environ.get("PORT"), url_path=os.environ.get("BOT_TOKEN"))
+	updater.bot.set_webhook(os.environ.get("URL") + "/" + TOKEN)
 
 	log("Started.")
 	#await client.catch_up()
