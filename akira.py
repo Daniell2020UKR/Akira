@@ -20,7 +20,7 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 async def akira_start(message: types.Message):
 	await message.reply("Hi! Im Akira.")
 	print(message)
-	result = client(GetMessagesRequest(
+	result = await client(GetMessagesRequest(
 		channel=message.chat.username,
 		id=[message.message_id]
 	))
