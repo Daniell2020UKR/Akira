@@ -9,6 +9,7 @@ async def akira_yt2a(message: types.Message):
 
 async def akira_ipfs(message: types.Message):
 	if message.reply_to_message:
+		print(message)
 		if message.reply_to_message.document:
 			resolved_id = resolve_bot_file_id(message.reply_to_message.document.file_id)
 			print(resolved_id)
