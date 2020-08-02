@@ -8,7 +8,12 @@ akira = "0.1"
 
 def log(text): print(f"[Akira] {text}")
 
-client = TelegramClient(MemorySession(), os.environ.get("API_ID"), os.environ.get("API_HASH")).start(bot_token=os.environ.get("BOT_TOKEN"))
+class Akira(TelegramClient):
+	async def connect():
+		await super().connect()
+		await client.catch_up()
+
+client = Akira(MemorySession(), os.environ.get("API_ID"), os.environ.get("API_HASH")).start(bot_token=os.environ.get("BOT_TOKEN"))
 
 @client.on(events.NewMessage(pattern="/start"))
 async def akira_start(event):
@@ -24,7 +29,6 @@ async def main():
 	updater.bot.set_webhook(os.environ.get("URL") + "/" + os.environ.get("BOT_TOKEN"))
 
 	log("Started.")
-	await client.catch_up()
 	await client.run_until_disconnected()
 
 if __name__ == "__main__":
