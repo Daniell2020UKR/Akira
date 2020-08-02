@@ -1,4 +1,4 @@
-import os
+import os, tempfile, shutil, requests
 from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
 from aiogram.utils.executor import start_webhook
@@ -18,13 +18,24 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 @dp.message_handler(commands=["start"], run_task=True)
 async def akira_start(message: types.Message):
 	await message.reply("Hi! Im Akira.")
-	chat = await client.get_entity(message.chat.username)
-	result = await client.get_messages(chat, ids=message.message_id)
-	if result.reply_to_msg_id:
-		rmsg = await client.get_messages(chat, ids=result.reply_to_msg_id)
-		dfile = await rmsg.download_media("/tmp")
-		print(dfile)
-	
+
+@dp.message_handler(commands=["ipfs"], run_task=True)
+async def akira_start(message: types.Message):
+	temp_dir = tempfile.mkdtemp(tempfile.gettempdir())
+	chat = await client.get_entity(message.chat.id)
+	telethon_message = await client.get_messages(chat, ids=message.message_id)
+	if telethon_message.reply_to_msg_id:
+		telethon_reply_message = await client.get_messages(chat, ids=telethon_message.reply_to_msg_id)
+		reply = await message.reply("Downloading...")
+		dfile = await telethon_reply_message.download_media(temp_dir)
+		reply.edit("Uploading...")
+		res = requests.post("https://ipfsupload.herokuapp.com/upload", files={"file": open(dfile, "rb")})
+		reply.delete()
+		await message.reply(res.text)
+	else:
+		await message.reply("Please respond to a message with a file.")
+	shutil.rmtree(temp_dir)
+
 if __name__ == "__main__":
 	log(f"Starting Akira {akira}...")
 
