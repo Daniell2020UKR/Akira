@@ -9,7 +9,7 @@ akira = "0.1"
 def log(text): print(f"[Akira] {text}")
 
 class Akira(TelegramClient):
-	async def connect():
+	async def connect(self):
 		await super().connect()
 		await client.catch_up()
 
