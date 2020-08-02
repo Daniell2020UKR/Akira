@@ -1,4 +1,5 @@
 import os, asyncio
+from aiogram import Bot
 from telethon.sessions import MemorySession
 from telethon.tl.types import DocumentAttributeAudio
 from telethon import TelegramClient, events
@@ -16,6 +17,7 @@ async def akira_start(event):
 
 async def main():
 	log(f"Starting Akira {akira}...")
+	bot = Bot(token=os.environ.get("BOT_TOKEN"))
 
 	# Dummy webhook
 	await bot.set_webhook(os.environ.get("URL") + "/" + os.environ.get("BOT_TOKEN"))
