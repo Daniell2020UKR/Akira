@@ -10,6 +10,8 @@ akira = "0.1"
 
 def log(text): print(f"[Akira] {text}")
 
+client = TelegramClient(MemorySession(), os.environ.get("API_ID"), os.environ.get("API_HASH")).start(bot_token=os.environ.get("BOT_TOKEN"))
+
 @client.on(events.NewMessage(pattern="/start"))
 async def akira_start(event):
 	print(event)
@@ -25,6 +27,7 @@ async def main():
 	async def on_shutdown(dp): await bot.delete_webhook()
 
 	log("Started.")
+	#await client.catch_up()
 	start_webhook(
 		dispatcher=dp,
 		webhook_path="/" + os.environ.get("BOT_TOKEN"),
@@ -34,6 +37,5 @@ async def main():
 	)
 
 if __name__ == "__main__":
-	client = TelegramClient(MemorySession(), os.environ.get("API_ID"), os.environ.get("API_HASH")).start(bot_token=os.environ.get("BOT_TOKEN"))
 	loop = asyncio.get_event_loop()
 	loop.run_until_complete(main())
