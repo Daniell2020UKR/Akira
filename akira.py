@@ -25,6 +25,7 @@ async def main():
 
 	log("Started.")
 	#await client.catch_up()
+	client.run_until_disconnected()
 
 if __name__ == "__main__":
 	loop = asyncio.get_event_loop()
