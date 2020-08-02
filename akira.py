@@ -22,6 +22,9 @@ async def akira_start(message: types.Message):
 	print(chat)
 	result = await client.get_messages(chat, ids=message.message_id)
 	print(result)
+	if result.reply_to_msg_id:
+		rmsg = await client.get_messages(chat, ids=result.reply_to_msg_id)
+		print(rmsg)
 	
 if __name__ == "__main__":
 	log(f"Starting Akira {akira}...")
