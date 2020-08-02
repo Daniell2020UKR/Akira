@@ -1,33 +1,37 @@
-import os, asyncio
-from telegram.ext import Updater
+import os
+from aiogram import Bot
+from aiogram.dispatcher import Dispatcher
+from aiogram.utils.executor import start_webhook
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from telethon.sessions import MemorySession
-from telethon.tl.types import DocumentAttributeAudio
-from telethon import TelegramClient, events
+from telethon.utils import get_message_id
+from telethon import TelegramClient
 
 akira = "0.1"
 
 def log(text): print(f"[Akira] {text}")
 
 client = TelegramClient(MemorySession(), os.environ.get("API_ID"), os.environ.get("API_HASH")).start(bot_token=os.environ.get("BOT_TOKEN"))
+bot = Bot(token=os.environ.get("BOT_TOKEN"))
+dp = Dispatcher(bot, storage=MemoryStorage())
 
-@client.on(events.NewMessage(pattern="/start"))
-async def akira_start(event):
-	print(event)
-	await event.reply("Hi! Im Akira.")
-
-async def main():
-	log(f"Starting Akira {akira}...")
-	await client.connect()
-	await client.catch_up()
-
-	# Dummy webhook
-	updater = Updater(os.environ.get("BOT_TOKEN"), use_context=True)
-	updater.start_webhook(listen="0.0.0.0", port=os.environ.get("PORT"), url_path=os.environ.get("BOT_TOKEN"))
-	updater.bot.set_webhook(os.environ.get("URL") + "/" + os.environ.get("BOT_TOKEN"))
-
-	log("Started.")
-	await client.run_until_disconnected()
+@dp.message_handler(commands=["start"], run_task=True)
+async def akira_start(message: types.Message):
+	tmsg = await get_message_id(message.message_id)
+	print(tmsg)
+	await message.reply("Hi! Im Akira.")
 
 if __name__ == "__main__":
-	loop = asyncio.get_event_loop()
-	loop.run_until_complete(main())
+	log(f"Starting Akira {akira}...")
+
+	async def on_startup(dp): await bot.set_webhook(os.environ.get("URL") + "/" + os.environ.get("BOT_TOKEN"))
+	async def on_shutdown(dp): await bot.delete_webhook()
+
+	log("Started.")
+	start_webhook(
+		dispatcher=dp,
+		webhook_path="/" + os.environ.get("BOT_TOKEN"),
+		on_startup=on_startup,
+		on_shutdown=on_shutdown,
+		port=os.environ.get("PORT")
+	)
