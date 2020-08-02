@@ -21,7 +21,7 @@ async def main():
 	log(f"Starting Akira {akira}...")
 	log("Creating bot client...")
 	bot = Bot(token=os.environ.get("BOT_TOKEN"))
-	dp = Dispatcher(bot, storage=MemoryStorage())
+	dp = Dispatcher(bot)
 
 	async def on_startup(dp): await bot.set_webhook(os.environ.get("URL") + "/" + os.environ.get("BOT_TOKEN"))
 	async def on_shutdown(dp): await bot.delete_webhook()
