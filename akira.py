@@ -1,6 +1,7 @@
 import os, asyncio, random, qrcode, tempfile, shutil, uuid
 from telethon.sessions import MemorySession
 from telethon.tl.types import DocumentAttributeAudio
+from telethon.utils import resolve_bot_file_id
 from telethon import TelegramClient
 from nanogram import Nanogram
 from pyzbar.pyzbar import decode
@@ -251,6 +252,8 @@ async def akira_weather(bot, update):
 async def akira_ipfs(bot, update):
 	if update['message']['args']:
 		print(update['message'])
+		resolved_id = resolve_bot_file_id(update['message']['reply_to_message']['document']['file_id'])
+		print(resolved_id)
 	else:
 		await bot.send_message(
 			text='No arguments.',
