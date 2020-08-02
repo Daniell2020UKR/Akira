@@ -27,14 +27,26 @@ async def akira_ipfs(message: types.Message):
 	if telethon_message.reply_to_msg_id:
 		telethon_reply_message = await client.get_messages(chat, ids=telethon_message.reply_to_msg_id)
 		reply = await message.reply("Downloading...")
-		dfile = await telethon_reply_message.download_media(temp_dir)
-		reply.edit_text("Uploading...")
-		res = requests.post("https://ipfsupload.herokuapp.com/upload", files={"file": open(dfile, "rb")})
-		reply.delete()
-		await message.reply(res.text)
+		downloaded_file = await telethon_reply_message.download_media(temp_dir)
+		await reply.edit_text("Uploading...")
+		response = requests.post("https://ipfsupload.herokuapp.com/upload", files={"file": open(downloaded_file, "rb")})
+		await reply.delete()
+		await message.reply(response.text)
 	else:
 		await message.reply("Please respond to a message with a file.")
 	shutil.rmtree(temp_dir)
+
+@dp.message_handler(commands=["yt2a"], run_task=True)
+async def akira_ipfs(message: types.Message):
+	await message.reply("This command is not available now.")
+
+@dp.message_handler(commands=["weather"], run_task=True)
+async def akira_ipfs(message: types.Message):
+	await message.reply("This command is not available now.")
+
+@dp.message_handler(commands=["qr"], run_task=True)
+async def akira_ipfs(message: types.Message):
+	await message.reply("This command is not available now.")
 
 if __name__ == "__main__":
 	log(f"Starting Akira {akira}...")
