@@ -3,6 +3,7 @@ from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
 from aiogram.utils.executor import start_webhook
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from telethon.functions.channels import GetMessagesRequest
 from telethon.sessions import MemorySession
 from telethon.utils import get_message_id
 from telethon import TelegramClient
@@ -19,8 +20,11 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 async def akira_start(message: types.Message):
 	await message.reply("Hi! Im Akira.")
 	print(message)
-	tmsg = await get_message_id(message.message_id)
-	print(tmsg)
+	result = client(GetMessagesRequest(
+		channel=message.chat.username,
+		id=[message.message_id]
+	))
+	print(result)
 	
 if __name__ == "__main__":
 	log(f"Starting Akira {akira}...")
