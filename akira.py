@@ -21,7 +21,7 @@ async def akira_start(message: types.Message):
 
 @dp.message_handler(commands=["ipfs"], run_task=True)
 async def akira_ipfs(message: types.Message):
-	temp_dir = tempfile.mkdtemp(tempfile.gettempdir())
+	temp_dir = tempfile.mkdtemp(dir=tempfile.gettempdir())
 	chat = await client.get_entity(message.chat.id)
 	telethon_message = await client.get_messages(chat, ids=message.message_id)
 	if telethon_message.reply_to_msg_id:
