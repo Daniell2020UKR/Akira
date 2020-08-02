@@ -1,7 +1,4 @@
 import os, asyncio
-from aiogram import Bot
-from aiogram.dispatcher import Dispatcher
-from aiogram.utils.executor import start_webhook
 from telethon.sessions import MemorySession
 from telethon.tl.types import DocumentAttributeAudio
 from telethon import TelegramClient, events
@@ -19,22 +16,16 @@ async def akira_start(event):
 
 async def main():
 	log(f"Starting Akira {akira}...")
-	log("Creating bot client...")
-	bot = Bot(token=os.environ.get("BOT_TOKEN"))
-	dp = Dispatcher(bot)
 
-	async def on_startup(dp): await bot.set_webhook(os.environ.get("URL") + "/" + os.environ.get("BOT_TOKEN"))
-	async def on_shutdown(dp): await bot.delete_webhook()
+	# Dummy webhook
+	await bot.set_webhook(os.environ.get("URL") + "/" + os.environ.get("BOT_TOKEN"))
+	async def webhook(request): return web.Response(text="ACK")
+	app = web.Application()
+	app.router.add_post("/" + os.environ.get("BOT_TOKEN"), webhook)
+	web.run_app(app, port=os.environ.get("PORT"))
 
 	log("Started.")
 	#await client.catch_up()
-	start_webhook(
-		dispatcher=dp,
-		webhook_path="/" + os.environ.get("BOT_TOKEN"),
-		on_startup=on_startup,
-		on_shutdown=on_shutdown,
-		port=os.environ.get("PORT")
-	)
 
 if __name__ == "__main__":
 	loop = asyncio.get_event_loop()
