@@ -4,7 +4,7 @@ from aiogram.dispatcher import Dispatcher
 from aiogram.utils.executor import start_webhook
 from telethon.sessions import MemorySession
 from telethon.tl.types import DocumentAttributeAudio
-from telethon import TelegramClient
+from telethon import TelegramClient, events
 
 akira = "0.1"
 
