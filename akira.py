@@ -3,6 +3,7 @@ from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
 from aiogram.utils.executor import start_webhook
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from telethon.tl.types import MessageMediaDocument, MessageMediaPhoto
 from telethon.sessions import MemorySession
 from telethon.utils import get_message_id
 from telethon import TelegramClient
@@ -26,14 +27,25 @@ async def akira_ipfs(message: types.Message):
 	telethon_message = await client.get_messages(chat, ids=message.message_id)
 	if telethon_message.reply_to_msg_id:
 		telethon_reply_message = await client.get_messages(chat, ids=telethon_message.reply_to_msg_id)
-		document = telethon_reply_message.get("media")
-		print(document)
+		if type(telethon_reply_message.media) == MessageMediaDocument:
+			file_size = telethon_reply_message.document.size
+		elif type(telethon_reply_message.media) == MessageMediaPhoto:
+			file_size = telethon_reply_message.photo.size
+		else:
+			await message.reply("Invalid file type.")
+			shutil.rmtree(temp_dir)
+			return
+		if file_size > (512 * 1024 * 1024):
+			await message.reply("File is too big. Maximum file size is 512 MB.")
+			shutil.rmtree(temp_dir)
+			return
 		reply = await message.reply("Downloading...")
 		try:
 			downloaded_file = await telethon_reply_message.download_media(temp_dir)
 		except:
 			await reply.delete()
 			await message.reply("An error occurred while downloading a file.")
+			shutil.rmtree(temp_dir)
 			return
 		await reply.edit_text("Uploading...")
 		try:
@@ -42,6 +54,7 @@ async def akira_ipfs(message: types.Message):
 		except:
 			await reply.delete()
 			await message.reply("An error occurred while uploading a file.")
+			shutil.rmtree(temp_dir)
 			return
 		await reply.delete()
 		await message.reply(await response.text())
