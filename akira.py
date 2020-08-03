@@ -36,12 +36,11 @@ async def akira_ipfs(message: types.Message):
 		await reply.edit_text("Uploading...")
 		try:
 			async with aiohttp.ClientSession() as session:
-				response = session.post("https://ipfsupload.herokuapp.com/upload", data={"file": open(downloaded_file, "rb")})
+				response = await session.post("https://ipfsupload.herokuapp.com/upload", data={"file": open(downloaded_file, "rb")})
 		except:
 			await reply.delete()
 			await message.reply("An error occurred while uploading a file.")
 			return
-		print(await response.text())
 		await reply.delete()
 		await message.reply(await response.text())
 	else:
