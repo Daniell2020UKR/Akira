@@ -26,6 +26,7 @@ async def akira_ipfs(message: types.Message):
 	telethon_message = await client.get_messages(chat, ids=message.message_id)
 	if telethon_message.reply_to_msg_id:
 		telethon_reply_message = await client.get_messages(chat, ids=telethon_message.reply_to_msg_id)
+		print(telethon_reply_message)
 		reply = await message.reply("Downloading...")
 		try:
 			downloaded_file = await telethon_reply_message.download_media(temp_dir)
