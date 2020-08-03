@@ -41,7 +41,7 @@ async def akira_ipfs(message: types.Message):
 			await message.reply("An error occurred while uploading a file.")
 			return
 		await reply.delete()
-		await message.reply(f"https://ipfs.io/ipfs/{response.text}")
+		await message.reply(response.text)
 	else:
 		await message.reply("Please respond to a message with a file.")
 	shutil.rmtree(temp_dir)
