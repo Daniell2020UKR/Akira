@@ -1,4 +1,4 @@
-import os, tempfile, shutil, requests
+import os, tempfile, shutil, aiohttp
 from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
 from aiogram.utils.executor import start_webhook
@@ -35,13 +35,14 @@ async def akira_ipfs(message: types.Message):
 			return
 		await reply.edit_text("Uploading...")
 		try:
-			response = requests.post("https://ipfsupload.herokuapp.com/upload", files={"file": open(downloaded_file, "rb")})
+			async with aiohttp.ClientSession() as session:
+				response = session.post("https://ipfsupload.herokuapp.com/upload", data={"file": open(downloaded_file, "rb")})
 		except:
 			await reply.delete()
 			await message.reply("An error occurred while uploading a file.")
 			return
 		await reply.delete()
-		await message.reply(response.text)
+		await message.reply(await response.text())
 	else:
 		await message.reply("Please respond to a message with a file.")
 	shutil.rmtree(temp_dir)
