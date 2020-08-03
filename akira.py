@@ -41,6 +41,7 @@ async def akira_ipfs(message: types.Message):
 			await reply.delete()
 			await message.reply("An error occurred while uploading a file.")
 			return
+		print(await response.text())
 		await reply.delete()
 		await message.reply(await response.text())
 	else:
