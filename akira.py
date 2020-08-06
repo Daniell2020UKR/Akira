@@ -78,13 +78,11 @@ if __name__ == "__main__":
 	log(f"Starting Akira {akira}...")
 
 	async def on_startup(dp): await bot.set_webhook(os.environ.get("URL") + "/" + os.environ.get("BOT_TOKEN"))
-	async def on_shutdown(dp): await bot.delete_webhook()
 
 	log("Started.")
 	start_webhook(
 		dispatcher=dp,
 		webhook_path="/" + os.environ.get("BOT_TOKEN"),
 		on_startup=on_startup,
-		on_shutdown=on_shutdown,
 		port=os.environ.get("PORT")
 	)
