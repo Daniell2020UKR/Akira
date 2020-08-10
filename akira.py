@@ -80,7 +80,7 @@ async def akira_xdl(message: types.Message):
 	args = message.get_args().split(" ")
 	chat = await client.get_entity(message.chat.id)
 	telethon_message = await client.get_messages(chat, ids=message.message_id)
-	async def default_logger(sent, total):
+	async def default_upload(sent, total):
 		percent = int(round((sent / total) * 100))
 		print(percent)
 		try:
@@ -92,6 +92,19 @@ async def akira_xdl(message: types.Message):
 				await reply.edit_text("Uploading... (This might take a while)\n●●●○○")
 			elif percent == 80:
 				await reply.edit_text("Uploading... (This might take a while)\n●●●●○")
+		except: pass
+	async def default_download(sent, total):
+		percent = int(round((sent / total) * 100))
+		print(percent)
+		try:
+			if percent == 20:
+				await reply.edit_text("Downloading...\n●○○○○")
+			elif percent == 40:
+				await reply.edit_text("Downloading...\n●●○○○")
+			elif percent == 60:
+				await reply.edit_text("Downloading...\n●●●○○")
+			elif percent == 80:
+				await reply.edit_text("Downloading...\n●●●●○")
 		except: pass
 	if args:
 		if args[0] == "animekisa":
@@ -112,12 +125,19 @@ async def akira_xdl(message: types.Message):
 					if fembed_id:
 						api = await session.post(f"https://fcdn.stream/api/source/{fembed_id}")
 						url = (await api.json())["data"][-1]["file"]
+						video = urllib.request.urlopen(url)
+						video_size = video.info()["Content-Length"]
+						await reply.edit_text("Downloading...\n○○○○○")
+						with open(f"{temp_dir}/video.mp4", "wb") as ovideo:
+							for chunk in iter(lambda: video.read(65535), ""):
+								await default_download(ovideo.tell(), video_size)
+								ovideo.write(chunk)
 						await reply.edit_text("Uploading... (This might take a while)\n○○○○○")
 						await client.send_file(
 							chat,
-							file=urllib.request.urlopen(url),
+							file=open(f"{temp_dir}/video.mp4", "rb"),
 							reply_to=telethon_message,
-							progress_callback=default_logger,
+							progress_callback=default_upload,
 							attributes=[DocumentAttributeVideo(
 								duration=0,
 								w=0,
