@@ -76,7 +76,7 @@ async def akira_qr(message: types.Message):
 
 @dp.message_handler(commands=["xdl"], run_task=True)
 async def akira_xdl(message: types.Message):
-	args = message.get_args()
+	args = message.get_args().split(" ")
 	print(args)
 	chat = await client.get_entity(message.chat.id)
 	telethon_message = await client.get_messages(chat, ids=message.message_id)
