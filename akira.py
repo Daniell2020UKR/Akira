@@ -82,7 +82,6 @@ async def akira_xdl(message: types.Message):
 	telethon_message = await client.get_messages(chat, ids=message.message_id)
 	async def default_upload(sent, total):
 		percent = int(round((sent / total) * 100))
-		print(percent)
 		try:
 			if percent == 20:
 				await reply.edit_text("Uploading... (This might take a while)\n●○○○○")
@@ -95,7 +94,6 @@ async def akira_xdl(message: types.Message):
 		except: pass
 	async def default_download(sent, total):
 		percent = int(round((sent / total) * 100))
-		print(percent)
 		try:
 			if percent == 20:
 				await reply.edit_text("Downloading...\n●○○○○")
