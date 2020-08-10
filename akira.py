@@ -77,7 +77,6 @@ async def akira_qr(message: types.Message):
 @dp.message_handler(commands=["xdl"], run_task=True)
 async def akira_xdl(message: types.Message):
 	args = message.get_args().split(" ")
-	print(args)
 	chat = await client.get_entity(message.chat.id)
 	telethon_message = await client.get_messages(chat, ids=message.message_id)
 	if args:
@@ -102,10 +101,12 @@ async def akira_xdl(message: types.Message):
 						api = await session.post(f"https://fcdn.stream/api/source/{fembed_id}")
 						url = (await api.json())["data"][-1]["file"]
 					else:
+						await reply.delete()
 						await message.reply("Failed to parse Fembed ID.")
+						return
 					await client.send_file(
 						chat,
-						file=url,
+						file=urllib.request.urlopen(url),
 						reply_to=telethon_message
 					)
 				except:
