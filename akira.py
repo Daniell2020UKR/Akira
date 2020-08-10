@@ -80,6 +80,8 @@ async def akira_xdl(message: types.Message):
 	args = message.get_args().split(" ")
 	chat = await client.get_entity(message.chat.id)
 	telethon_message = await client.get_messages(chat, ids=message.message_id)
+	async def default_logger(sent, total):
+		print(sent, total)
 	if args:
 		if args[0] == "animekisa":
 			reply = await message.reply("Parsing Fembed ID...")
@@ -104,7 +106,8 @@ async def akira_xdl(message: types.Message):
 						await client.send_file(
 							chat,
 							file=urllib.request.urlopen(url),
-							reply_to=telethon_message
+							reply_to=telethon_message,
+							progress_callback=default_logger
 						)
 					else:
 						await reply.delete()
