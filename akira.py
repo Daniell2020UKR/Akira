@@ -83,14 +83,16 @@ async def akira_xdl(message: types.Message):
 	async def default_logger(sent, total):
 		percent = int(round((sent / total) * 100))
 		print(percent)
-		if percent == 20:
-			await reply.edit_text("Uploading... (This might take a while)\n●○○○○")
-		elif percent == 40:
-			await reply.edit_text("Uploading... (This might take a while)\n●●○○○")
-		elif percent == 60:
-			await reply.edit_text("Uploading... (This might take a while)\n●●●○○")
-		elif percent == 80:
-			await reply.edit_text("Uploading... (This might take a while)\n●●●●○")
+		try:
+			if percent == 20:
+				await reply.edit_text("Uploading... (This might take a while)\n●○○○○")
+			elif percent == 40:
+				await reply.edit_text("Uploading... (This might take a while)\n●●○○○")
+			elif percent == 60:
+				await reply.edit_text("Uploading... (This might take a while)\n●●●○○")
+			elif percent == 80:
+				await reply.edit_text("Uploading... (This might take a while)\n●●●●○")
+		except: pass
 	if args:
 		if args[0] == "animekisa":
 			reply = await message.reply("Parsing Fembed ID...")
@@ -106,7 +108,6 @@ async def akira_xdl(message: types.Message):
 					await reply.delete()
 					await message.reply("An error occurred while trying to parse Fembed ID.")
 					return
-
 				try:
 					if fembed_id:
 						api = await session.post(f"https://fcdn.stream/api/source/{fembed_id}")
