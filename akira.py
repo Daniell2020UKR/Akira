@@ -76,43 +76,46 @@ async def akira_qr(message: types.Message):
 
 @dp.message_handler(commands=["xdl"], run_task=True)
 async def akira_xdl(message: types.Message):
-	args = await message.get_args()
+	args = message.get_args()
+	print(args)
 	chat = await client.get_entity(message.chat.id)
 	telethon_message = await client.get_messages(chat, ids=message.message_id)
-	if args[0] == "animekisa":
-		reply = await message.reply("Parsing Fembed ID...")
-		async with aiohttp.ClientSession() as session:
-			try:
-				page = await session.get(args[1])
-				fembed_id = None
-				async for line in page.content:
-					line = line.decode("UTF-8")
-					if "var Fembed" in line and "var Fembed2" not in line:
-						fembed_id = line.split("\"")[1].split("/")[-1]
-			except:
-				await reply.delete()
-				await message.reply("An error occurred while trying to parse Fembed ID.")
-				return
+	if args:
+		if args[0] == "animekisa":
+			reply = await message.reply("Parsing Fembed ID...")
+			async with aiohttp.ClientSession() as session:
+				try:
+					page = await session.get(args[1])
+					fembed_id = None
+					async for line in page.content:
+						line = line.decode("UTF-8")
+						if "var Fembed" in line and "var Fembed2" not in line:
+							fembed_id = line.split("\"")[1].split("/")[-1]
+				except:
+					await reply.delete()
+					await message.reply("An error occurred while trying to parse Fembed ID.")
+					return
 
-			try:
-				if fembed_id:
-					await reply.edit_text("Uploading... (This might take a while)")
-					api = await session.post(f"https://fcdn.stream/api/source/{fembed_id}")
-					url = (await api.json())["data"][-1]["file"]
-				else:
-					await message.reply("Failed to parse Fembed ID.")
-				await client.send_file(
-					chat,
-					file=url,
-					reply_to=telethon_message
-				)
-			except:
-				await reply.delete()
-				await message.reply("An error occurred while trying to process video.")
-				return
+				try:
+					if fembed_id:
+						await reply.edit_text("Uploading... (This might take a while)")
+						api = await session.post(f"https://fcdn.stream/api/source/{fembed_id}")
+						url = (await api.json())["data"][-1]["file"]
+					else:
+						await message.reply("Failed to parse Fembed ID.")
+					await client.send_file(
+						chat,
+						file=url,
+						reply_to=telethon_message
+					)
+				except:
+					await reply.delete()
+					await message.reply("An error occurred while trying to process video.")
+					return
+		else:
+			await message.reply("Unknown downloader \"{}\".".format(args[0]))
 	else:
-		await message.reply("Unknown downloader \"{}\".".format(args[0]))
-	await message.reply("This command is not available now.")
+		await message.reply("Usage: /xdl (downloader) (URL)")
 
 if __name__ == "__main__":
 	log(f"Starting Akira {akira}...")
