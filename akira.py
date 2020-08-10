@@ -3,7 +3,7 @@ from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
 from aiogram.utils.executor import start_webhook
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from telethon.tl.types import MessageMediaDocument, MessageMediaPhoto
+from telethon.tl.types import MessageMediaDocument, MessageMediaPhoto, DocumentAttributeVideo
 from telethon.sessions import MemorySession
 from telethon.utils import get_message_id
 from telethon import TelegramClient
@@ -81,7 +81,16 @@ async def akira_xdl(message: types.Message):
 	chat = await client.get_entity(message.chat.id)
 	telethon_message = await client.get_messages(chat, ids=message.message_id)
 	async def default_logger(sent, total):
-		print(sent, total)
+		percent = int(round((sent / total) * 100))
+		print(percent)
+		if percent == 20:
+			await reply.edit_text("Uploading... (This might take a while)\n●○○○○")
+		elif percent == 40:
+			await reply.edit_text("Uploading... (This might take a while)\n●●○○○")
+		elif percent == 60:
+			await reply.edit_text("Uploading... (This might take a while)\n●●●○○")
+		elif percent == 80:
+			await reply.edit_text("Uploading... (This might take a while)\n●●●●○")
 	if args:
 		if args[0] == "animekisa":
 			reply = await message.reply("Parsing Fembed ID...")
@@ -102,12 +111,19 @@ async def akira_xdl(message: types.Message):
 					if fembed_id:
 						api = await session.post(f"https://fcdn.stream/api/source/{fembed_id}")
 						url = (await api.json())["data"][-1]["file"]
-						await reply.edit_text("Uploading... (This might take a while)")
+						await reply.edit_text("Uploading... (This might take a while)\n○○○○○")
 						await client.send_file(
 							chat,
 							file=urllib.request.urlopen(url),
 							reply_to=telethon_message,
-							progress_callback=default_logger
+							progress_callback=default_logger,
+							attributes=[DocumentAttributeVideo(
+								duration=0,
+								w=0,
+								h=0,
+								round_message=False,
+								supports_streaming=True
+							)]
 						)
 					else:
 						await reply.delete()
