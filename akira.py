@@ -98,17 +98,12 @@ async def akira_xdl(message: types.Message):
 
 				try:
 					if fembed_id:
-						await reply.edit_text("Downloading...")
 						api = await session.post(f"https://fcdn.stream/api/source/{fembed_id}")
 						url = (await api.json())["data"][-1]["file"]
-						video = urllib.request.urlopen(url)
-						with open(f"{temp_dir}/video.mp4", "wb") as ovideo:
-							for chunk in iter(lambda: video.read(65535), ""):
-								ovideo.write(chunk)
 						await reply.edit_text("Uploading... (This might take a while)")
 						await client.send_file(
 							chat,
-							file=open(f"{temp_dir}/video.mp4", "rb"),
+							file=urllib.request.urlopen(url),
 							reply_to=telethon_message
 						)
 					else:
