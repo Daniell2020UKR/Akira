@@ -76,6 +76,7 @@ async def akira_qr(message: types.Message):
 
 @dp.message_handler(commands=["xdl"], run_task=True)
 async def akira_xdl(message: types.Message):
+	temp_dir = tempfile.mkdtemp(dir=tempfile.gettempdir())
 	args = message.get_args().split(" ")
 	chat = await client.get_entity(message.chat.id)
 	telethon_message = await client.get_messages(chat, ids=message.message_id)
@@ -97,18 +98,23 @@ async def akira_xdl(message: types.Message):
 
 				try:
 					if fembed_id:
-						await reply.edit_text("Uploading... (This might take a while)")
+						await reply.edit_text("Downloading...")
 						api = await session.post(f"https://fcdn.stream/api/source/{fembed_id}")
 						url = (await api.json())["data"][-1]["file"]
+						video = urllib.request.urlopen(url)
+						with open(f"{temp_dir}/video.mp4", "wb") as ovideo:
+							for chunk in iter(lambda: video.read(65535), ""):
+								ovideo.write(chunk)
+						await reply.edit_text("Uploading... (This might take a while)")
+						await client.send_file(
+							chat,
+							file=open(f"{temp_dir}/video.mp4", "rb"),
+							reply_to=telethon_message
+						)
 					else:
 						await reply.delete()
 						await message.reply("Failed to parse Fembed ID.")
 						return
-					await client.send_file(
-						chat,
-						file=urllib.request.urlopen(url),
-						reply_to=telethon_message
-					)
 				except:
 					await reply.delete()
 					await message.reply("An error occurred while trying to process video.")
@@ -117,6 +123,7 @@ async def akira_xdl(message: types.Message):
 			await message.reply("Unknown downloader \"{}\".".format(args[0]))
 	else:
 		await message.reply("Usage: /xdl (downloader) (URL)")
+	shutil.rmtree(temp_dir)
 
 if __name__ == "__main__":
 	log(f"Starting Akira {akira}...")
