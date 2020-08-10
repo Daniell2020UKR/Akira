@@ -126,7 +126,7 @@ async def akira_xdl(message: types.Message):
 						api = await session.post(f"https://fcdn.stream/api/source/{fembed_id}")
 						url = (await api.json())["data"][-1]["file"]
 						video = urllib.request.urlopen(url)
-						video_size = video.info()["Content-Length"]
+						video_size = int(video.info()["Content-Length"])
 						await reply.edit_text("Downloading...\n○○○○○")
 						with open(f"{temp_dir}/video.mp4", "wb") as ovideo:
 							for chunk in iter(lambda: video.read(65535), ""):
