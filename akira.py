@@ -1,4 +1,4 @@
-import os, tempfile, shutil, aiohttp, urllib
+import os, tempfile, shutil, aiohttp, aiofiles
 from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
 from aiogram.utils.executor import start_webhook
@@ -82,6 +82,7 @@ async def akira_xdl(message: types.Message):
 	telethon_message = await client.get_messages(chat, ids=message.message_id)
 	async def default_upload(sent, total):
 		percent = int(round((sent / total) * 100))
+		print(percent)
 		try:
 			if percent == 20:
 				await reply.edit_text("Uploading... (This might take a while)\n●○○○○")
@@ -94,6 +95,7 @@ async def akira_xdl(message: types.Message):
 		except: pass
 	async def default_download(sent, total):
 		percent = int(round((sent / total) * 100))
+		print(percent)
 		try:
 			if percent == 20:
 				await reply.edit_text("Downloading...\n●○○○○")
@@ -109,49 +111,59 @@ async def akira_xdl(message: types.Message):
 			reply = await message.reply("Parsing Fembed ID...")
 			async with aiohttp.ClientSession() as session:
 				try:
-					page = await session.get(args[1])
-					fembed_id = None
-					async for line in page.content:
-						line = line.decode("UTF-8")
-						if "var Fembed" in line and "var Fembed2" not in line:
-							fembed_id = line.split("\"")[1].split("/")[-1]
+					async with session.get("https://animekisa.tv/pokemon-2019-episode-32") as site:
+						fembed_id = None
+						async for line in site.content:
+							line = line.decode("UTF-8")
+							if "var Fembed" in line and "var Fembed2" not in line:
+								fembed_id = line.split("\"")[1].split("/")[-1]
 				except:
 					await reply.delete()
-					await message.reply("An error occurred while trying to parse Fembed ID.")
+					await message.reply("Failed to parse Fembed ID.")
 					return
+
 				try:
-					if fembed_id:
-						api = await session.post(f"https://fcdn.stream/api/source/{fembed_id}")
-						url = (await api.json())["data"][-1]["file"]
-						video = urllib.request.urlopen(url)
-						video_size = int(video.info()["Content-Length"])
-						await reply.edit_text("Downloading...\n○○○○○")
-						with open(f"{temp_dir}/video.mp4", "wb") as ovideo:
-							for chunk in iter(lambda: video.read(65535), ""):
-								await default_download(ovideo.tell(), video_size)
-								ovideo.write(chunk)
-						await reply.edit_text("Uploading... (This might take a while)\n○○○○○")
-						await client.send_file(
-							chat,
-							file=open(f"{temp_dir}/video.mp4", "rb"),
-							reply_to=telethon_message,
-							progress_callback=default_upload,
-							attributes=[DocumentAttributeVideo(
-								duration=0,
-								w=0,
-								h=0,
-								round_message=False,
-								supports_streaming=True
-							)]
-						)
-					else:
-						await reply.delete()
-						await message.reply("Failed to parse Fembed ID.")
-						return
+					async with session.post(f"https://fcdn.stream/api/source/{fembed_id}") as api:
+						videos = (await api.json())["data"]
 				except:
 					await reply.delete()
-					await message.reply("An error occurred while trying to process video.")
+					await message.reply("Failed to get a response from API.")
 					return
+
+				index = -1
+				await reply.edit_text("Downloading...\n○○○○○")
+				while True:
+					async with session.get(videos[index]["file"]) as video:
+						video_size = int(video.headers["Content-Length"])
+						if (video_size / 1048576) > 2048:
+							index -= 1
+							if len(videos) + (index + 1) == 0:
+								await reply.delete()
+								await message.reply("Video is too big.")
+								return
+							continue
+						async with aiofiles.open(f"{temp_dir}/video.mp4", "wb") as ovideo:
+							while True:
+								await default_download(await ovideo.tell(), video_size)
+								chunk = await video.content.read(65535)
+								if not chunk:
+									break
+								await ovideo.write(chunk)
+							break
+				await reply.edit_text("Uploading... (This might take a while)\n○○○○○")
+				await client.send_file(
+					chat,
+					file=open(f"{temp_dir}/video.mp4", "rb"),
+					reply_to=telethon_message,
+					progress_callback=default_upload,
+					attributes=[DocumentAttributeVideo(
+						duration=0,
+						w=0,
+						h=0,
+						round_message=False,
+						supports_streaming=True
+					)]
+				)
 		else:
 			await message.reply("Unknown downloader \"{}\".".format(args[0]))
 	else:
