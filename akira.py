@@ -110,7 +110,7 @@ async def akira_xdl(message: types.Message):
 			reply = await message.reply("Parsing Fembed ID...")
 			async with aiohttp.ClientSession() as session:
 				try:
-					async with session.get("https://animekisa.tv/pokemon-2019-episode-32") as site:
+					async with session.get(args[1]) as site:
 						fembed_id = None
 						async for line in site.content:
 							line = line.decode("UTF-8")
