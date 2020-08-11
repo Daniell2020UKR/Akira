@@ -1,4 +1,4 @@
-import os, tempfile, shutil, aiohttp, aiofiles
+import os, tempfile, shutil, aiohttp, aiofiles, urllib
 from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
 from aiogram.utils.executor import start_webhook
@@ -132,8 +132,8 @@ async def akira_xdl(message: types.Message):
 				index = -1
 				await reply.edit_text("Downloading...\n○○○○○")
 				while True:
-					async with session.get(videos[index]["file"]) as video:
-						video_size = int(video.headers["Content-Length"])
+					with urllib.request.urlopen(videos[index]["file"]) as video:
+						video_size = int(video.info()["Content-Length"])
 						if (video_size / 1048576) > 2048:
 							index -= 1
 							if len(videos) + (index + 1) == 0:
@@ -144,7 +144,7 @@ async def akira_xdl(message: types.Message):
 						async with aiofiles.open(f"{temp_dir}/video.mp4", "wb") as ovideo:
 							while True:
 								await default_download(await ovideo.tell(), video_size)
-								chunk = await video.content.read(65535)
+								chunk = video.read(65535)
 								if not chunk:
 									break
 								await ovideo.write(chunk)
