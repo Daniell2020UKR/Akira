@@ -9,6 +9,7 @@ from telethon.utils import get_message_id
 from telethon import TelegramClient
 
 akira = "0.1"
+akira_dir = "akira"
 
 def log(text): print(f"[Akira] {text}")
 
@@ -22,7 +23,7 @@ async def akira_start(message: types.Message):
 
 @dp.message_handler(commands=["ipfs"], run_task=True)
 async def akira_ipfs(message: types.Message):
-	temp_dir = tempfile.mkdtemp(dir=tempfile.gettempdir())
+	temp_dir = tempfile.mkdtemp(dir=akira_dir)
 	chat = await client.get_entity(message.chat.id)
 	telethon_message = await client.get_messages(chat, ids=message.message_id)
 	if telethon_message.reply_to_msg_id:
@@ -76,7 +77,7 @@ async def akira_qr(message: types.Message):
 
 @dp.message_handler(commands=["xdl"], run_task=True)
 async def akira_xdl(message: types.Message):
-	temp_dir = tempfile.mkdtemp(dir=tempfile.gettempdir())
+	temp_dir = tempfile.mkdtemp(dir=akira_dir)
 	args = message.get_args().split(" ")
 	chat = await client.get_entity(message.chat.id)
 	telethon_message = await client.get_messages(chat, ids=message.message_id)
