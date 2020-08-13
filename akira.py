@@ -47,21 +47,30 @@ async def akira_qr(message: types.Message):
 async def akira_xdl(message: types.Message):
 	args = message.get_args().split(" ")
 	if args[0]:
-		temp_dir = tempfile.mkdtemp(dir=akira_dir)
-		chat = await client.get_entity(message.chat.id)
-		telethon_message = await client.get_messages(chat, ids=message.message_id)
+		try:
+			temp_dir = tempfile.mkdtemp(dir=akira_dir)
+			chat = await client.get_entity(message.chat.id)
+			telethon_message = await client.get_messages(chat, ids=message.message_id)
+		except:
+			await message.reply("Error 1")
 
-		async def upload_callback(sent, total):
-			percent = int((sent / total) * 100)
-			try:
-				await reply.edit_text("Uploading...\nProgress: {}".format(dots[percent]))
-			except: pass
-		async def download_callback(percent, eta, size, speed):
-			try:
-				await reply.edit_text("Downloading...\nSize: {}\nETA: {}\nSpeed: {}\nProgress: {}".format(size, eta, speed, dots[percent]))
-			except: pass
+		try:
+			async def upload_callback(sent, total):
+				percent = int((sent / total) * 100)
+				try:
+					await reply.edit_text("Uploading...\nProgress: {}".format(dots[percent]))
+				except: pass
+			async def download_callback(percent, eta, size, speed):
+				try:
+					await reply.edit_text("Downloading...\nSize: {}\nETA: {}\nSpeed: {}\nProgress: {}".format(size, eta, speed, dots[percent]))
+				except: pass
+		except:
+			await message.reply("Error 2")
 
-		reply = await message.reply("Downloading...\nProgress: {}".format(dots[0]))
+		try:
+			reply = await message.reply("Downloading...\nProgress: {}".format(dots[0]))
+		except:
+			await message.reply("Error 3")
 		try:
 			ret = await xdl.downloaders[args[0]](aria2client, args[1], temp_dir, download_callback)
 		except:
