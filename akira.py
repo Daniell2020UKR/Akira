@@ -95,11 +95,8 @@ async def akira_xdl(message: types.Message):
 			return
 
 		if ret[0] == xdl.xdl_aria2:
-			target = temp_dir + ret[1].name
+			target = temp_dir + "/" + ret[1].name
 			ext = target.split(".")[-1]
-
-		print(target)
-		print(ext)
 
 		if ext == "mp4":
 			attrib = [DocumentAttributeVideo(
