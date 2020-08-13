@@ -72,6 +72,10 @@ async def akira_xdl(message: types.Message):
 		except:
 			await message.reply("Error 3")
 		try:
+			print(aria2client)
+		except:
+			await message.reply("Error 4")
+		try:
 			ret = await xdl.downloaders[args[0]](aria2client, args[1], temp_dir, download_callback)
 		except:
 			await message.reply("Downloader \"{}\" is not found.".format(args[0]))
