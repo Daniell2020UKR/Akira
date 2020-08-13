@@ -24,11 +24,15 @@ async def xdl_animekisa(client, url, output_dir, callback, maxsize=2048):
 		print("Test 2")
 
 		if fembed_id:
+			print("Yes, fembed_id")
 			try:
 				async with session.post(f"https://fcdn.stream/api/source/{fembed_id}") as api:
 					videos = (await api.json())["data"]
 			except:
 				return xdl_api_error
+
+			print("Done fetching")
+			print(videos)
 
 			index = -1
 			while True:
