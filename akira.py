@@ -52,9 +52,7 @@ async def akira_xdl(message: types.Message):
 		telethon_message = await client.get_messages(chat, ids=message.message_id)
 
 		async def upload_callback(sent, total):
-			print("Test")
 			percent = int((sent / total) * 100)
-			print(percent)
 			try:
 				if percent in dots.keys():
 					await reply.edit_text("Uploading...\nProgress: {}".format(dots[percent]))
