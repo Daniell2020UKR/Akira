@@ -42,8 +42,9 @@ async def xdl_animekisa(client, url, output_dir, callback, maxsize=2048):
 				download = client.add_uris([videos[index]["file"]], options={"dir": output_dir})
 				while not download.is_complete and not download.has_failed:
 					download.update()
-					await callback(int(download.progress), download.eta_string(), download.total_length_string(), download.download_speed_string())
-					await asyncio.sleep(1)
+					for i in range(0, 5):
+						await callback(int(download.progress), download.eta_string(), download.total_length_string(), download.download_speed_string())
+						await asyncio.sleep(1)
 				download.update()
 				return [xdl_aria2, download]
 		else:
