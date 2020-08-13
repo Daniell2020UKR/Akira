@@ -9,7 +9,6 @@ xdl_path = "XDL_PATH"
 xdl_ytdl = "XDL_YTDL"
 
 async def xdl_animekisa(client, url, output_dir, callback, maxsize=2048):
-	print("Test")
 	async with aiohttp.ClientSession() as session:
 		try:
 			async with session.get(url) as site:
@@ -21,18 +20,14 @@ async def xdl_animekisa(client, url, output_dir, callback, maxsize=2048):
 		except:
 			return xdl_parse_error
 
-		print("Test 2")
-
 		if fembed_id:
-			print("Yes, fembed_id")
 			try:
 				async with session.post(f"https://fcdn.stream/api/source/{fembed_id}") as api:
 					videos = (await api.json())["data"]
+					if type(videos) == str:
+						return xdl_api_error
 			except:
 				return xdl_api_error
-
-			print("Done fetching")
-			print(videos)
 
 			index = -1
 			while True:
@@ -43,8 +38,6 @@ async def xdl_animekisa(client, url, output_dir, callback, maxsize=2048):
 						if len(videos) + (index + 1) == 0:
 							return xdl_file_too_big
 						continue
-
-				print("Test 3")
 
 				download = client.add_uris([videos[index]["file"]], options={"dir": output_dir})
 				while not download.is_complete and not download.has_failed:

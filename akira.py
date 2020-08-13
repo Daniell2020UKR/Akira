@@ -54,11 +54,13 @@ async def akira_xdl(message: types.Message):
 		async def upload_callback(sent, total):
 			percent = int((sent / total) * 100)
 			try:
-				await reply.edit_text("Uploading...\nProgress: {}".format(dots[percent]))
+				if percent in dots.keys():
+					await reply.edit_text("Uploading...\nProgress: {}".format(dots[percent]))
 			except: pass
 		async def download_callback(percent, eta, size, speed):
 			try:
-				await reply.edit_text("Downloading...\nSize: {}\nETA: {}\nSpeed: {}\nProgress: {}".format(size, eta, speed, dots[percent]))
+				if percent in dots.keys():
+					await reply.edit_text("Downloading...\nSize: {}\nETA: {}\nSpeed: {}\nProgress: {}".format(size, eta, speed, dots[percent]))
 			except: pass
 
 		reply = await message.reply("Downloading...\nProgress: {}".format(dots[0]))
