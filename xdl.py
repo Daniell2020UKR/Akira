@@ -1,4 +1,4 @@
-import os, subprocess, aiohttp, tempfile, aria2p, urllib, asyncio
+import aiohttp, urllib, asyncio
 
 xdl_file_too_big = "XDL_FILE_TOO_BIG"
 xdl_download_error = "XDL_DOWNLOAD_ERROR"
