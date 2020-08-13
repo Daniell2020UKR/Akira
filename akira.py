@@ -9,6 +9,7 @@ from telethon.utils import get_message_id
 from telethon import TelegramClient
 
 akira = "0.1"
+akira_dir = os.getcwd() + "/akira"
 
 def log(text): print(f"[Akira] {text}")
 
