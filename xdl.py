@@ -51,7 +51,7 @@ async def xdl_animekisa(client, url, output_dir, callback, maxsize=2048):
 						eta = download.eta_string()
 						size = download.total_length_string()
 						speed = download.download_speed_string()
-					callback(percent, eta, size, speed)
+					await callback(percent, eta, size, speed)
 					await asyncio.sleep(1)
 				download.update()
 				if download.has_failed:
