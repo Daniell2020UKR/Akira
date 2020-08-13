@@ -1,4 +1,4 @@
-import os, subprocess, shutil, aiohttp, aria2p, time, xdl
+import os, subprocess, shutil, aiohttp, aria2p, time, xdl, tempfile
 from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
 from aiogram.utils.executor import start_webhook
