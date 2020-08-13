@@ -63,7 +63,7 @@ async def akira_xdl(message: types.Message):
 
 		reply = await message.reply("Downloading...\nProgress: {}".format(dots[0]))
 		try:
-			ret = await xdl.downloaders[args[0]](client, args[1], temp_dir, download_callback)
+			ret = await xdl.downloaders[args[0]](aria2client, args[1], temp_dir, download_callback)
 		except:
 			await message.reply("Downloader \"{}\" is not found.".format(args[0]))
 			await reply.delete()
@@ -128,7 +128,7 @@ if __name__ == "__main__":
 	time.sleep(1)
 
 	log("Creating Aria2 client...")
-	client = aria2p.API(aria2p.Client(host="http://127.0.0.1", port=6800))
+	aria2client = aria2p.API(aria2p.Client(host="http://127.0.0.1", port=6800))
 
 	if not os.path.exists(akira_dir):
 		os.mkdir(akira_dir)
