@@ -6,4 +6,4 @@ aiogram==2.9.2
 Telethon==1.16.2
 cryptg==0.2.post1
 aiohttp==3.6.2
-aiofiles==0.5.0
+aria2p==0.9.1

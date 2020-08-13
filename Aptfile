@@ -2,3 +2,4 @@ libzbar0
 libzbar-dev
 libssl1.1
 libssl-dev
+aria2
