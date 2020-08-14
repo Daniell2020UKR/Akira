@@ -31,14 +31,6 @@ async def xdl_animekisa(client, url, output_dir, callback, maxsize=2048):
 
 			index = -1
 			while True:
-				with urllib.request.urlopen(videos[index]["file"]) as video:
-					video_size = int(video.info()["Content-Length"])
-					if (video_size / 1048576) > maxsize:
-						index -= 1
-						if len(videos) + (index + 1) == 0:
-							return xdl_file_too_big
-						continue
-
 				download = client.add_uris([videos[index]["file"]], options={"dir": output_dir})
 				percent = int(download.progress)
 				eta = download.eta_string()
@@ -46,6 +38,13 @@ async def xdl_animekisa(client, url, output_dir, callback, maxsize=2048):
 				speed = download.download_speed_string()
 				while not download.is_complete and not download.has_failed:
 					download.update()
+					if (download.total_length / 1048576) > maxsize:
+						index -= 1
+						if len(videos) + (index + 1) == 0:
+							return xdl_file_too_big
+						download.remove(files=True)
+						download = client.add_uris([videos[index]["file"]], options={"dir": output_dir})
+						continue
 					if percent != int(download.progress):
 						percent = int(download.progress)
 						eta = download.eta_string()
@@ -55,11 +54,37 @@ async def xdl_animekisa(client, url, output_dir, callback, maxsize=2048):
 					await asyncio.sleep(1)
 				download.update()
 				if download.has_failed:
+					download.remove(files=True)
 					return xdl_download_error
 				return [xdl_aria2, download]
 		else:
 			return xdl_parse_error
 
+async def xdl_url(client, url, output_dir, callback, maxsize=2048):
+	download = client.add_uris([url], options={"dir": output_dir})
+	percent = int(download.progress)
+	eta = download.eta_string()
+	size = download.total_length_string()
+	speed = download.download_speed_string()
+	while not download.is_complete and not download.has_failed:
+		download.update()
+		if (download.total_length / 1048576) > maxsize:
+			download.remove(files=True)
+			return xdl_file_too_big
+		if percent != int(download.progress):
+			percent = int(download.progress)
+			eta = download.eta_string()
+			size = download.total_length_string()
+			speed = download.download_speed_string()
+		await callback(percent, eta, size, speed)
+		await asyncio.sleep(1)
+	download.update()
+	if download.has_failed:
+		download.remove(files=True)
+		return xdl_download_error
+	return [xdl_aria2, download]
+
 downloaders = {
 	"animekisa": xdl_animekisa
+	"url": xdl_url
 }

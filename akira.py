@@ -105,10 +105,8 @@ async def akira_xdl(message: types.Message):
 				supports_streaming=True
 			)]
 		else:
-			await message.reply("Unknown file format.")
-			await reply.delete()
-			shutil.rmtree(temp_dir)
-			return
+			attrib = None
+
 		await reply.edit_text("Uploading...\nProgress: {}".format(dots[0]))
 		await client.send_file(
 			chat,
@@ -118,6 +116,10 @@ async def akira_xdl(message: types.Message):
 			attributes=attrib
 		)
 		await reply.delete()
+
+		if ret[0] == xdl.xdl_aria2:
+			ret[1].delete(files=True)
+
 		shutil.rmtree(temp_dir)
 	else:
 		await message.reply("Usage: /xdl (downloader) (URL)")
