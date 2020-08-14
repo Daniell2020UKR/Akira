@@ -56,12 +56,14 @@ async def akira_xdl(message: types.Message):
 			try:
 				if percent in dots.keys():
 					await reply.edit_text("Uploading...\nProgress: {}".format(dots[percent]))
-			except: pass
+			except:
+				pass
 		async def download_callback(percent, eta, size, speed):
 			try:
 				if percent in dots.keys():
 					await reply.edit_text("Downloading...\nSize: {}\nETA: {}\nSpeed: {}\nProgress: {}".format(size, eta, speed, dots[percent]))
-			except: pass
+			except:
+				pass
 
 		reply = await message.reply("Downloading...\nProgress: {}".format(dots[0]))
 		try:
@@ -91,12 +93,23 @@ async def akira_xdl(message: types.Message):
 			await reply.delete()
 			shutil.rmtree(temp_dir)
 			return
+		elif ret == xdl.xdl_invalid_url:
+			await message.reply("Invalid URL.")
+			await reply.delete()
+			shutil.rmtree(temp_dir)
+			return
+		elif ret == xdl.xdl_unknown_error:
+			await message.reply("An unknown error occurred.")
+			await reply.delete()
+			shutil.rmtree(temp_dir)
+			return
 
 		if ret[0] == xdl.xdl_aria2:
 			target = temp_dir + "/" + ret[1].name
-			ext = target.split(".")[-1]
 
-		if ext == "mp4":
+		ext = target.split(".")[-1]
+
+		if ext in ["mp4", "avi", "mov", "flv", "mkv"]:
 			attrib = [DocumentAttributeVideo(
 				duration=0,
 				w=0,
@@ -104,6 +117,8 @@ async def akira_xdl(message: types.Message):
 				round_message=False,
 				supports_streaming=True
 			)]
+		elif ext in ["m4a", "mp3", "ogg", "flac"]:
+			attrib = None
 		else:
 			attrib = None
 

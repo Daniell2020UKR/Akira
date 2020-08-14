@@ -1,9 +1,11 @@
-import aiohttp, urllib, asyncio
+import aiohttp, asyncio
 
 xdl_file_too_big = "XDL_FILE_TOO_BIG"
 xdl_download_error = "XDL_DOWNLOAD_ERROR"
 xdl_parse_error = "XDL_PARSE_ERROR"
 xdl_api_error = "XDL_API_ERROR"
+xdl_invalid_url = "XDL_INVALID_URL"
+xdl_unknown_error = "XDL_UNKNOWN_ERROR"
 xdl_aria2 = "XDL_ARIA2"
 xdl_path = "XDL_PATH"
 xdl_ytdl = "XDL_YTDL"
@@ -24,14 +26,15 @@ async def xdl_animekisa(client, url, output_dir, callback, maxsize=2048):
 			try:
 				async with session.post(f"https://fcdn.stream/api/source/{fembed_id}") as api:
 					videos = (await api.json())["data"]
-					if type(videos) == str:
-						return xdl_api_error
 			except:
 				return xdl_api_error
 
 			index = -1
 			while True:
-				download = client.add_uris([videos[index]["file"]], options={"dir": output_dir})
+				try:
+					download = client.add_uris([videos[index]["file"]], options={"dir": output_dir})
+				except:
+					return xdl_api_error
 				percent = int(download.progress)
 				eta = download.eta_string()
 				size = download.total_length_string()
@@ -41,9 +44,13 @@ async def xdl_animekisa(client, url, output_dir, callback, maxsize=2048):
 					if (download.total_length / 1048576) > maxsize:
 						index -= 1
 						if len(videos) + (index + 1) == 0:
+							download.remove(files=True)
 							return xdl_file_too_big
 						download.remove(files=True)
-						download = client.add_uris([videos[index]["file"]], options={"dir": output_dir})
+						try:
+							download = client.add_uris([videos[index]["file"]], options={"dir": output_dir})
+						except:
+							return xdl_api_error
 						continue
 					if percent != int(download.progress):
 						percent = int(download.progress)
@@ -61,7 +68,10 @@ async def xdl_animekisa(client, url, output_dir, callback, maxsize=2048):
 			return xdl_parse_error
 
 async def xdl_url(client, url, output_dir, callback, maxsize=2048):
-	download = client.add_uris([url], options={"dir": output_dir})
+	try:
+		download = client.add_uris([url], options={"dir": output_dir})
+	except:
+		return xdl_invalid_url
 	percent = int(download.progress)
 	eta = download.eta_string()
 	size = download.total_length_string()
