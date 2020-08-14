@@ -85,6 +85,6 @@ async def xdl_url(client, url, output_dir, callback, maxsize=2048):
 	return [xdl_aria2, download]
 
 downloaders = {
-	"animekisa": xdl_animekisa
+	"animekisa": xdl_animekisa,
 	"url": xdl_url
 }
