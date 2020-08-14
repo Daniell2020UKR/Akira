@@ -109,7 +109,7 @@ async def akira_xdl(message: types.Message):
 
 		ext = target.split(".")[-1]
 
-		if ext in ["mp4", "avi", "mov", "flv", "mkv"]:
+		if ext in ["mp4", "avi", "mkv"]:
 			attrib = [DocumentAttributeVideo(
 				duration=0,
 				w=0,
@@ -118,6 +118,8 @@ async def akira_xdl(message: types.Message):
 				supports_streaming=True
 			)]
 		elif ext in ["m4a", "mp3", "ogg", "flac"]:
+			attrib = None
+		elif ext in ["jpg", "jpeg", "webp", "png"]:
 			attrib = None
 		else:
 			attrib = None
