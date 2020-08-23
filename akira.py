@@ -33,6 +33,21 @@ dots = {
 
 builtins.yt2a_cache = {}
 
+async def upload_callback(sent, total):
+	percent = int((sent / total) * 100)
+	try:
+		if percent in dots.keys():
+			await reply.edit_text("Uploading...\nProgress: {}".format(dots[percent]))
+	except:
+		pass
+
+async def download_callback(percent, eta, size, speed):
+	try:
+		if percent in dots.keys():
+			await reply.edit_text("Downloading...\nSize: {}\nETA: {}\nSpeed: {}\nProgress: {}".format(size, eta, speed, dots[percent]))
+	except:
+		pass
+
 @dp.message_handler(commands=["start"], run_task=True)
 async def akira_start(message: types.Message):
 	await message.reply("Hi! Im Akira.")
@@ -52,20 +67,6 @@ async def akira_xdl(message: types.Message):
 		temp_dir = tempfile.mkdtemp(dir=akira_dir)
 		chat = await client.get_entity(message.chat.id)
 		telethon_message = await client.get_messages(chat, ids=message.message_id)
-
-		async def upload_callback(sent, total):
-			percent = int((sent / total) * 100)
-			try:
-				if percent in dots.keys():
-					await reply.edit_text("Uploading...\nProgress: {}".format(dots[percent]))
-			except:
-				pass
-		async def download_callback(percent, eta, size, speed):
-			try:
-				if percent in dots.keys():
-					await reply.edit_text("Downloading...\nSize: {}\nETA: {}\nSpeed: {}\nProgress: {}".format(size, eta, speed, dots[percent]))
-			except:
-				pass
 
 		reply = await message.reply("Downloading...\nProgress: {}".format(dots[0]))
 		try:
@@ -196,6 +197,44 @@ async def akira_yt2a(message: types.Message):
 			return
 		await reply.delete()
 		shutil.rmtree(download_dir)
+	else:
+		await message.reply("No arguments.")
+
+@dp.message_handler(commands=["weather"], run_task=True)
+async def akira_weather(bot, update):
+	args = message.get_args()
+	if args:
+		if os.environ.get("OWM_API_KEY"):
+			api_key = os.environ.get("OWM_API_KEY")
+			async with aiohttp.get(f"https://api.openweathermap.org/data/2.5/weather?q={args}&units=metric&appid={api_key}") as response:
+				weather_data = await response.json()
+			try:
+				country = weather_data["sys"]["country"]
+				condition = weather_data["weather"][0]["main"]
+				condition_description = weather_data["weather"][0]["description"]
+				city = weather_data["name"]
+				temp = weather_data["main"]["temp"]
+				max_temp = weather_data["main"]["temp_max"]
+				min_temp = weather_data["main"]["temp_min"]
+				feel_temp = weather_data["main"]["feels_like"]
+				wind_speed = weather_data["wind"]["speed"]
+				humidity = weather_data["main"]["humidity"]
+			except:
+				await message.reply("An error occurred while trying to get weather data.")
+				return
+			await message.reply(
+				f"=== {country}, {city} ===\n"
+				f"Condition: {condition}({condition_description})\n"
+				f"Humidity: {humidity}%\n"
+				f"Wind speed: {wind_speed} m/s\n\n"
+				f"=== Temperature ===\n"
+				f"Current: {temp} °C\n"
+				f"Feels like: {feel_temp} °C\n"
+				f"Max: {max_temp} °C\n"
+				f"Min: {min_temp} °C\n"
+			)
+		else:
+			await message.reply("No OpenWeatherMap API key is found.")
 	else:
 		await message.reply("No arguments.")
 
