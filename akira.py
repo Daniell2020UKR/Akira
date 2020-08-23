@@ -148,16 +148,18 @@ async def akira_yt2a(message: types.Message):
 	args = message.get_args().split(" ")
 	if args[0]:
 		download_dir = tempfile.mkdtemp(dir=akira_dir)
-		args = {"format": "bestaudio[ext=m4a][filesize<?250M]", "outtmpl": f"{download_dir}/audio-%(id)s.%(ext)s", "writethumbnail": True}
+		dargs = {"format": "bestaudio[ext=m4a][filesize<?250M]", "outtmpl": f"{download_dir}/audio-%(id)s.%(ext)s", "writethumbnail": True}
 		reply = await message.reply("Downloading...")
 		try:
-			with YoutubeDL(args) as ydl:
+			with YoutubeDL(dargs) as ydl:
 				audio_info = ydl.extract_info(args[0], download=False)
 				audio_id = audio_info["id"]
 				if not yt2a_cache.get(audio_id):
 					ydl.download([args[0]])
-					if os.path.exists(f"{download_dir}/audio-{audio_id}.webp"): thumbext = "webp"
-					else: thumbext = "jpg"
+					if os.path.exists(f"{download_dir}/audio-{audio_id}.webp"):
+						thumbext = "webp"
+					else:
+						thumbext = "jpg"
 		except:
 			await message.reply("Download error.")
 			await reply.delete()
