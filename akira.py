@@ -197,7 +197,7 @@ async def akira_yt2a(message: types.Message):
 		await message.reply("No arguments.")
 
 @dp.message_handler(commands=["weather"], run_task=True)
-async def akira_weather(bot, update):
+async def akira_weather(message: types.Message):
 	args = message.get_args()
 	if args:
 		if os.environ.get("OWM_API_KEY"):
