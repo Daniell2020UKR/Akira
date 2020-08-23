@@ -1,12 +1,12 @@
-import os, subprocess, shutil, aiohttp, aria2p, time, xdl, tempfile
+import os, subprocess, shutil, aiohttp, aria2p, time, xdl, tempfile, builtins
 from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
 from aiogram.utils.executor import start_webhook
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from telethon.tl.types import DocumentAttributeVideo
+from telethon.tl.types import DocumentAttributeVideo, DocumentAttributeAudio
 from telethon.sessions import MemorySession
-from telethon.utils import get_message_id
 from telethon import TelegramClient
+from youtube_dl import YoutubeDL
 
 akira = "0.1"
 akira_dir = os.getcwd() + "/akira"
@@ -30,6 +30,8 @@ dots = {
 	90: "●●●●●●●●●○",
 	100: "●●●●●●●●●●"
 }
+
+builtins.yt2a_cache = {}
 
 @dp.message_handler(commands=["start"], run_task=True)
 async def akira_start(message: types.Message):
@@ -140,6 +142,60 @@ async def akira_xdl(message: types.Message):
 		shutil.rmtree(temp_dir)
 	else:
 		await message.reply("Usage: /xdl (downloader) (URL)")
+
+@dp.message_handler(commands=["yt2a"], run_task=True)
+async def akira_yt2a(message: types.Message):
+	args = message.get_args().split(" ")
+	if args[0]:
+		download_dir = tempfile.mkdtemp(dir=temp_dir)
+		args = {"format": "bestaudio[ext=m4a][filesize<?250M]", "outtmpl": f"{download_dir}/audio-%(id)s.%(ext)s", "writethumbnail": True}
+		reply = await message.reply("Downloading...")
+		try:
+			with YoutubeDL(args) as ydl:
+				audio_info = ydl.extract_info(args[0], download=False)
+				audio_id = audio_info["id"]
+				if not yt2a_cache.get(audio_id):
+					ydl.download([args[0]])
+					if os.path.exists(f"{download_dir}/audio-{audio_id}.webp"): thumbext = "webp"
+					else: thumbext = "jpg"
+		except:
+			await message.reply("Download error.")
+			await reply.delete()
+			shutil.rmtree(download_dir)
+			return
+		await reply.edit_text("Uploading...")
+		chat = await client.get_entity(message.chat.id)
+		try:
+			if yt2a_cache.get(audio_id):
+				await client.send_file(
+					chat,
+					yt2a_cache[audio_id],
+					reply_to=message.message_id
+				)
+			else:
+				audio_file = await client.upload_file(open(f"{download_dir}/audio-{audio_id}.m4a", "rb"))
+				audio_message = await client.send_file(
+					chat,
+					audio_file,
+					thumb=open(f"{download_dir}/audio-{audio_id}.{thumbext}", "rb"),
+					reply_to=message.message_id,
+					attributes=[DocumentAttributeAudio(
+						title=audio_info["title"],
+						performer=audio_info["artist"],
+						voice=True,
+						duration=audio_info["duration"]
+					)]
+				)
+				yt2a_cache[audio_id] = audio_message.media
+		except:
+			await message.reply("Upload error.")
+			await reply.delete()
+			shutil.rmtree(download_dir)
+			return
+		await reply.delete()
+		shutil.rmtree(download_dir)
+	else:
+		await message.reply("No arguments.")
 
 if __name__ == "__main__":
 	log(f"Starting Akira {akira}...")
