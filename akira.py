@@ -147,7 +147,7 @@ async def akira_xdl(message: types.Message):
 async def akira_yt2a(message: types.Message):
 	args = message.get_args().split(" ")
 	if args[0]:
-		download_dir = tempfile.mkdtemp(dir=temp_dir)
+		download_dir = tempfile.mkdtemp(dir=akira_dir)
 		args = {"format": "bestaudio[ext=m4a][filesize<?250M]", "outtmpl": f"{download_dir}/audio-%(id)s.%(ext)s", "writethumbnail": True}
 		reply = await message.reply("Downloading...")
 		try:
