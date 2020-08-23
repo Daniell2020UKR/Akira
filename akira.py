@@ -52,10 +52,6 @@ async def download_callback(percent, eta, size, speed):
 async def akira_start(message: types.Message):
 	await message.reply("Hi! Im Akira.")
 
-@dp.message_handler(commands=["weather"], run_task=True)
-async def akira_weather(message: types.Message):
-	await message.reply("This command is not available now.")
-
 @dp.message_handler(commands=["qr"], run_task=True)
 async def akira_qr(message: types.Message):
 	await message.reply("This command is not available now.")
