@@ -202,8 +202,9 @@ async def akira_weather(bot, update):
 	if args:
 		if os.environ.get("OWM_API_KEY"):
 			api_key = os.environ.get("OWM_API_KEY")
-			async with aiohttp.get(f"https://api.openweathermap.org/data/2.5/weather?q={args}&units=metric&appid={api_key}") as response:
-				weather_data = await response.json()
+			async with aiohttp.ClientSession() as session:
+				async with session.get(f"https://api.openweathermap.org/data/2.5/weather?q={args}&units=metric&appid={api_key}") as response:
+					weather_data = await response.json()
 			try:
 				country = weather_data["sys"]["country"]
 				condition = weather_data["weather"][0]["main"]
