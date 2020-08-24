@@ -235,6 +235,18 @@ async def akira_weather(message: types.Message):
 	else:
 		await message.reply("No arguments.")
 
+@dp.message_handler(commands=["kanye"], run_task=True)
+async def akira_kanye(message: types.Message):
+	async with aiohttp.ClientSession() as session:
+		async with session.get("https://api.kanye.rest") as response:
+			await message.reply((await response.json())["quote"])
+
+@dp.message_handler(commands=["joke"], run_task=True)
+async def akira_joke(message: types.Message):
+	async with aiohttp.ClientSession() as session:
+		async with session.get("https://sv443.net/jokeapi/v2/joke/Any?blacklistFlags=nsfw,religious,political,racist,sexist&format=txt") as response:
+			await message.reply(await response.text())
+
 if __name__ == "__main__":
 	log(f"Starting Akira {akira}...")
 
