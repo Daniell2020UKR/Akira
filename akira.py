@@ -145,7 +145,7 @@ async def akira_yt2a(message: types.Message):
 	args = message.get_args()
 	if args:
 		download_dir = tempfile.mkdtemp(dir=akira_dir)
-		dargs = {"format": "bestaudio[ext=m4a][filesize<?250M]", "outtmpl": f"{download_dir}/audio-%(id)s.%(ext)s", "writethumbnail": True}
+		dargs = {"format": "bestaudio[ext=m4a][filesize<?250M]/bestaudio[ext=webm][filesize<?250M]", "outtmpl": f"{download_dir}/audio-%(id)s.%(ext)s", "writethumbnail": True}
 		reply = await message.reply("Downloading...")
 		try:
 			with YoutubeDL(dargs) as ydl:
