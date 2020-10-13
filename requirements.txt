@@ -5,5 +5,5 @@ youtube_dl==2020.9.20
 aiogram==2.10.1
 Telethon==1.16.2
 cryptg==0.2.post1
-aiohttp==3.6.2
+aiohttp==3.6.3
 aria2p==0.9.1
