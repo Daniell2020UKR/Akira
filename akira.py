@@ -236,7 +236,7 @@ async def akira_sc2a(message: types.Message):
 					attributes=[DocumentAttributeAudio(
 						title=audio_info["title"],
 						performer=audio_info["uploader"],
-						voice=True,
+						#voice=True, # WHAT THE ACTUAL FUCK IS GOING ON
 						duration=int(audio_info["duration"]) # Whoever coded Soundcloud extractor, fuck you.
 					)]
 				)
