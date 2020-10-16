@@ -183,8 +183,8 @@ async def akira_yt2a(message: types.Message):
 					attributes=[DocumentAttributeAudio(
 						title=audio_info["title"],
 						performer=audio_info["artist"],
-						voice=True,
-						duration=audio_info["duration"]
+						#voice=True, # Just to test something
+						duration=int(audio_info["duration"]) # In case somebody goes monkey brain we have int() (refer to /sc2a function)
 					)]
 				)
 				yt2a_cache[audio_id] = audio_message.media
@@ -237,7 +237,7 @@ async def akira_sc2a(message: types.Message):
 						title=audio_info["title"],
 						performer=audio_info["uploader"],
 						#voice=True, # WHAT THE ACTUAL FUCK IS GOING ON
-						duration=int(audio_info["duration"]) # Whoever coded Soundcloud extractor, fuck you.
+						duration=int(audio_info["duration"]) # Whoever coded Soundcloud extractor, fuck you. WHY IS IT FUCKING FLOAT INSTEAD OF INT
 					)]
 				)
 				sc2a_cache[audio_id] = audio_message.media
