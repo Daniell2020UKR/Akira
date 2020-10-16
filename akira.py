@@ -237,7 +237,7 @@ async def akira_sc2a(message: types.Message):
 						title=audio_info["title"],
 						performer=audio_info["uploader"],
 						voice=True,
-						duration=audio_info["duration"]
+						duration=int(audio_info["duration"]) # Whoever coded Soundcloud extractor, fuck you.
 					)]
 				)
 				sc2a_cache[audio_id] = audio_message.media
