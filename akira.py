@@ -32,6 +32,7 @@ dots = {
 }
 
 builtins.yt2a_cache = {}
+builtins.sc2a_cache = {}
 
 async def upload_callback(sent, total):
 	percent = int((sent / total) * 100)
@@ -145,12 +146,13 @@ async def akira_yt2a(message: types.Message):
 	args = message.get_args()
 	if args:
 		download_dir = tempfile.mkdtemp(dir=akira_dir)
-		dargs = {"format": "bestaudio[ext=m4a][filesize<?500M]/bestaudio[ext=webm][filesize<?500M]", "outtmpl": f"{download_dir}/audio-%(id)s.%(ext)s", "writethumbnail": True}
+		dargs = {"format": "bestaudio[filesize<?500M]", "outtmpl": f"{download_dir}/audio-%(id)s.%(ext)s", "writethumbnail": True}
 		reply = await message.reply("Downloading...")
 		try:
 			with YoutubeDL(dargs) as ydl:
 				audio_info = ydl.extract_info(args, download=False)
 				audio_id = audio_info["id"]
+				audio_ext = audio_info["ext"]
 				if not yt2a_cache.get(audio_id):
 					ydl.download([args])
 					if os.path.exists(f"{download_dir}/audio-{audio_id}.webp"):
@@ -172,7 +174,7 @@ async def akira_yt2a(message: types.Message):
 					reply_to=message.message_id
 				)
 			else:
-				audio_file = await client.upload_file(open(f"{download_dir}/audio-{audio_id}.m4a", "rb"))
+				audio_file = await client.upload_file(open(f"{download_dir}/audio-{audio_id}.{audio_ext}", "rb"))
 				audio_message = await client.send_file(
 					chat,
 					audio_file,
@@ -186,6 +188,59 @@ async def akira_yt2a(message: types.Message):
 					)]
 				)
 				yt2a_cache[audio_id] = audio_message.media
+		except:
+			await message.reply("Upload error.")
+			await reply.delete()
+			shutil.rmtree(download_dir)
+			return
+		await reply.delete()
+		shutil.rmtree(download_dir)
+	else:
+		await message.reply("No arguments.")
+
+@dp.message_handler(commands=["sc2a"], run_task=True)
+async def akira_sc2a(message: types.Message):
+	args = message.get_args()
+	if args:
+		download_dir = tempfile.mkdtemp(dir=akira_dir)
+		dargs = {"format": "bestaudio[filesize<?500M]", "outtmpl": f"{download_dir}/audio-%(id)s.%(ext)s", "writethumbnail": True}
+		reply = await message.reply("Downloading...")
+		try:
+			with YoutubeDL(dargs) as ydl:
+				audio_info = ydl.extract_info(args, download=False)
+				audio_id = audio_info["id"]
+				audio_ext = audio_info["ext"]
+				if not sc2a_cache.get(audio_id):
+					ydl.download([args])
+		except:
+			await message.reply("Download error.")
+			await reply.delete()
+			shutil.rmtree(download_dir)
+			return
+		await reply.edit_text("Uploading...")
+		chat = await client.get_entity(message.chat.id)
+		try:
+			if sc2a_cache.get(audio_id):
+				await client.send_file(
+					chat,
+					sc2a_cache[audio_id],
+					reply_to=message.message_id
+				)
+			else:
+				audio_file = await client.upload_file(open(f"{download_dir}/audio-{audio_id}.{audio_ext}", "rb"))
+				audio_message = await client.send_file(
+					chat,
+					audio_file,
+					thumb=open(f"{download_dir}/audio-{audio_id}.jpg", "rb"),
+					reply_to=message.message_id,
+					attributes=[DocumentAttributeAudio(
+						title=audio_info["title"],
+						performer=audio_info["uploader"],
+						voice=True,
+						duration=audio_info["duration"]
+					)]
+				)
+				sc2a_cache[audio_id] = audio_message.media
 		except:
 			await message.reply("Upload error.")
 			await reply.delete()
