@@ -1,3 +1,6 @@
+# Please destroy this fucking awful bot, i wanna die from looking at this awful code.
+# And yes, this is a monolithic bot, aka fucking awful bot with no modules support.
+
 import os, subprocess, shutil, aiohttp, aria2p, time, xdl, tempfile, builtins
 from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
@@ -31,6 +34,7 @@ dots = {
 	100: "●●●●●●●●●●"
 }
 
+# Ass
 builtins.yt2a_cache = {}
 builtins.sc2a_cache = {}
 
@@ -53,12 +57,8 @@ async def download_callback(percent, eta, size, speed):
 async def akira_start(message: types.Message):
 	await message.reply("Hi! Im Akira.")
 
-@dp.message_handler(commands=["qr"], run_task=True)
-async def akira_qr(message: types.Message):
-	await message.reply("This command is not available now.")
-
-@dp.message_handler(commands=["xdl"], run_task=True)
-async def akira_xdl(message: types.Message):
+#@dp.message_handler(commands=["xdl"], run_task=True)
+async def akira_xdl(message: types.Message):		# Shitty fucking piss dickhead motherfucker ugly ass goblin, fuck this shit.
 	args = message.get_args().split(" ")
 	if args[0]:
 		temp_dir = tempfile.mkdtemp(dir=akira_dir)
@@ -142,7 +142,7 @@ async def akira_xdl(message: types.Message):
 		await message.reply("Usage: /xdl (downloader) (URL)")
 
 @dp.message_handler(commands=["yt2a"], run_task=True)
-async def akira_yt2a(message: types.Message):
+async def akira_yt2a(message: types.Message):		# THIS SHIT DOESNT WORK HOW ITS SUPPOSED TO, WHY????????
 	args = message.get_args()
 	if args:
 		download_dir = tempfile.mkdtemp(dir=akira_dir)
@@ -198,7 +198,7 @@ async def akira_yt2a(message: types.Message):
 		await message.reply("No arguments.")
 
 @dp.message_handler(commands=["sc2a"], run_task=True)
-async def akira_sc2a(message: types.Message):
+async def akira_sc2a(message: types.Message):		# Also fuck this thing too, inherits all horrible code from /yt2a
 	args = message.get_args()
 	if args:
 		download_dir = tempfile.mkdtemp(dir=akira_dir)
@@ -259,6 +259,7 @@ async def akira_weather(message: types.Message):
 				async with session.get(f"https://api.openweathermap.org/data/2.5/weather?q={args}&units=metric&appid={api_key}") as response:
 					weather_data = await response.json()
 			try:
+				# I know, this is a bad way to do this, but format strings are fucking awful, so i cant do it any other way.
 				country = weather_data["sys"]["country"]
 				condition = weather_data["weather"][0]["main"]
 				condition_description = weather_data["weather"][0]["description"]
@@ -303,6 +304,7 @@ async def akira_joke(message: types.Message):
 if __name__ == "__main__":
 	log(f"Starting Akira {akira}...")
 
+	# Is this a good thing to do? I dont know.
 	log("Starting Aria2 daemon...")
 	aria2proc = subprocess.Popen(["aria2c", "--enable-rpc"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL)
 	time.sleep(1)
