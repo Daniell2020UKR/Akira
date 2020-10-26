@@ -38,14 +38,6 @@ dots = {
 builtins.yt2a_cache = {}
 builtins.sc2a_cache = {}
 
-async def upload_callback(sent, total):
-	percent = int((sent / total) * 100)
-	try:
-		if percent in dots.keys():
-			await reply.edit_text("Uploading...\nProgress: {}".format(dots[percent]))
-	except:
-		pass
-
 @dp.message_handler(commands=["start"], run_task=True)
 async def akira_start(message: types.Message):
 	await message.reply("Hi! Im Akira.")
@@ -64,6 +56,13 @@ async def akira_xdl(message: types.Message):		# Shitty fucking piss dickhead mot
 			try:
 				if percent in dots.keys():
 					await reply.edit_text("Downloading...\nSize: {}\nETA: {}\nSpeed: {}\nProgress: {}".format(size, eta, speed, dots[percent]))
+			except: pass
+
+		async def upload_callback(sent, total):
+			percent = int((sent / total) * 100)
+			try:
+				if percent in dots.keys():
+					await reply.edit_text("Uploading...\nProgress: {}".format(dots[percent]))
 			except: pass
 
 		try:
