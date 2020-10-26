@@ -180,6 +180,7 @@ async def akira_yt2a(message: types.Message):		# THIS SHIT DOESNT WORK HOW ITS S
 					thumb=open(f"{download_dir}/audio-{audio_id}.{thumbext}", "rb"),
 					reply_to=message.message_id,
 					attributes=[DocumentAttributeAudio(
+						voice=True,
 						title=audio_info["title"],
 						performer=audio_info["uploader"],
 						duration=int(audio_info["duration"]) # In case somebody goes monkey brain we have int() (refer to /sc2a function)
