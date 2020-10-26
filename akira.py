@@ -174,14 +174,12 @@ async def akira_yt2a(message: types.Message):		# THIS SHIT DOESNT WORK HOW ITS S
 					reply_to=message.message_id
 				)
 			else:
-				audio_file = await client.upload_file(open(f"{download_dir}/audio-{audio_id}.{audio_ext}", "rb"))
 				audio_message = await client.send_file(
 					chat,
-					audio_file,
+					open(f"{download_dir}/audio-{audio_id}.{audio_ext}", "rb")
 					thumb=open(f"{download_dir}/audio-{audio_id}.{thumbext}", "rb"),
 					reply_to=message.message_id,
 					attributes=[DocumentAttributeAudio(
-						voice=True,
 						title=audio_info["title"],
 						performer=audio_info["uploader"],
 						duration=int(audio_info["duration"]) # In case somebody goes monkey brain we have int() (refer to /sc2a function)
