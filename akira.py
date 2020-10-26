@@ -140,7 +140,7 @@ async def akira_xdl(message: types.Message):		# Shitty fucking piss dickhead mot
 		chat = await client.get_entity(message.chat.id)
 		telethon_message = await client.get_messages(chat, ids=message.message_id)
 
-		reply = await message.reply("Downloading...\nProgress: {}".format(dots[0]))
+		reply = await message.reply("Downloading...\n[ {} ]".format(dots[0]))
 
 		async def download_callback(percent, eta, size, speed):
 			try:
@@ -150,8 +150,7 @@ async def akira_xdl(message: types.Message):		# Shitty fucking piss dickhead mot
 		async def upload_callback(sent, total):
 			percent = int((sent / total) * 100)
 			try:
-				if percent in dots.keys():
-					await reply.edit_text("Uploading...\n[ {} ]".format(dots[percent]))
+				await reply.edit_text("Uploading...\n[ {} ]".format(dots[percent]))
 			except: pass
 
 		try:
@@ -212,7 +211,7 @@ async def akira_xdl(message: types.Message):		# Shitty fucking piss dickhead mot
 		else:
 			attrib = None
 
-		await reply.edit_text("Uploading...\nProgress: {}".format(dots[0]))
+		await reply.edit_text("Uploading...\n[ {} ]".format(dots[0]))
 		await client.send_file(
 			chat,
 			file=open(target, "rb"),
