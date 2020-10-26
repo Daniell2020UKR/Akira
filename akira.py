@@ -47,6 +47,7 @@ async def upload_callback(sent, total):
 		pass
 
 async def download_callback(percent, eta, size, speed):
+	print(percent)
 	try:
 		if percent in dots.keys():
 			await reply.edit_text("Downloading...\nSize: {}\nETA: {}\nSpeed: {}\nProgress: {}".format(size, eta, speed, dots[percent]))
