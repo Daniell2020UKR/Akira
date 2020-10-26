@@ -176,7 +176,7 @@ async def akira_yt2a(message: types.Message):		# THIS SHIT DOESNT WORK HOW ITS S
 			else:
 				audio_message = await client.send_file(
 					chat,
-					open(f"{download_dir}/audio-{audio_id}.{audio_ext}", "rb")
+					open(f"{download_dir}/audio-{audio_id}.{audio_ext}", "rb"),
 					thumb=open(f"{download_dir}/audio-{audio_id}.{thumbext}", "rb"),
 					reply_to=message.message_id,
 					attributes=[DocumentAttributeAudio(
