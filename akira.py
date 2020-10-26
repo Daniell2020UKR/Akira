@@ -46,14 +46,6 @@ async def upload_callback(sent, total):
 	except:
 		pass
 
-async def download_callback(percent, eta, size, speed):
-	global reply
-	try:
-		if percent in dots.keys():
-			await reply.edit_text("Downloading...\nSize: {}\nETA: {}\nSpeed: {}\nProgress: {}".format(size, eta, speed, dots[percent]))
-	except:
-		pass
-
 @dp.message_handler(commands=["start"], run_task=True)
 async def akira_start(message: types.Message):
 	await message.reply("Hi! Im Akira.")
@@ -67,6 +59,11 @@ async def akira_xdl(message: types.Message):		# Shitty fucking piss dickhead mot
 		telethon_message = await client.get_messages(chat, ids=message.message_id)
 
 		reply = await message.reply("Downloading...\nProgress: {}".format(dots[0]))
+
+		async def download_callback(percent, eta, size, speed):
+			if percent in dots.keys():
+				await reply.edit_text("Downloading...\nSize: {}\nETA: {}\nSpeed: {}\nProgress: {}".format(size, eta, speed, dots[percent]))
+
 		try:
 			ret = await xdl.downloaders[args[0]](aria2client, args[1], temp_dir, download_callback)
 		except:
