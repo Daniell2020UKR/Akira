@@ -146,7 +146,7 @@ async def akira_yt2a(message: types.Message):		# THIS SHIT DOESNT WORK HOW ITS S
 	args = message.get_args()
 	if args:
 		download_dir = tempfile.mkdtemp(dir=akira_dir)
-		dargs = {"format": "bestaudio[ext=m4a][filesize<?500M]", "outtmpl": f"{download_dir}/audio-%(id)s.%(ext)s", "writethumbnail": True}
+		dargs = {"format": "bestaudio[filesize<?500M]", "outtmpl": f"{download_dir}/audio-%(id)s.%(ext)s", "writethumbnail": True}
 		reply = await message.reply("Downloading...")
 		try:
 			with YoutubeDL(dargs) as ydl:
@@ -225,10 +225,9 @@ async def akira_sc2a(message: types.Message):		# Also fuck this thing too, inher
 					reply_to=message.message_id
 				)
 			else:
-				audio_file = await client.upload_file(open(f"{download_dir}/audio-{audio_id}.{audio_ext}", "rb"))
 				audio_message = await client.send_file(
 					chat,
-					audio_file,
+					open(f"{download_dir}/audio-{audio_id}.{audio_ext}", "rb"),
 					thumb=open(f"{download_dir}/audio-{audio_id}.jpg", "rb"),
 					reply_to=message.message_id,
 					attributes=[DocumentAttributeAudio(
