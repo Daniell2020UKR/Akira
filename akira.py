@@ -300,6 +300,7 @@ async def akira_sc2a(message: types.Message):		# Also fuck this thing too, inher
 		try:
 			with YoutubeDL(dargs) as ydl:
 				audio_info = ydl.extract_info(args, download=False)
+				print(audio_info)
 				audio_id = audio_info["id"]
 				audio_ext = audio_info["ext"]
 				if not sc2a_cache.get(audio_id):
