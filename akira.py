@@ -151,7 +151,7 @@ async def akira_xdl(message: types.Message):		# Shitty fucking piss dickhead mot
 			percent = int((sent / total) * 100)
 			try:
 				if percent in dots.keys():
-					await reply.edit_text("Uploading...\nProgress: {}".format(dots[percent]))
+					await reply.edit_text("Uploading...\n[ {} ]".format(dots[percent]))
 			except: pass
 
 		try:
