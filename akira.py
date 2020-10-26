@@ -57,7 +57,7 @@ async def download_callback(percent, eta, size, speed):
 async def akira_start(message: types.Message):
 	await message.reply("Hi! Im Akira.")
 
-#@dp.message_handler(commands=["xdl"], run_task=True)
+@dp.message_handler(commands=["xdl"], run_task=True)
 async def akira_xdl(message: types.Message):		# Shitty fucking piss dickhead motherfucker ugly ass goblin, fuck this shit.
 	args = message.get_args().split(" ")
 	if args[0]:
@@ -181,6 +181,7 @@ async def akira_yt2a(message: types.Message):		# THIS SHIT DOESNT WORK HOW ITS S
 					thumb=open(f"{download_dir}/audio-{audio_id}.{thumbext}", "rb"),
 					reply_to=message.message_id,
 					attributes=[DocumentAttributeAudio(
+						voice=True,
 						title=audio_info["title"],
 						performer=audio_info["uploader"],
 						duration=int(audio_info["duration"]) # In case somebody goes monkey brain we have int() (refer to /sc2a function)
