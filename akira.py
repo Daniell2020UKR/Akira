@@ -61,8 +61,10 @@ async def akira_xdl(message: types.Message):		# Shitty fucking piss dickhead mot
 		reply = await message.reply("Downloading...\nProgress: {}".format(dots[0]))
 
 		async def download_callback(percent, eta, size, speed):
-			if percent in dots.keys():
-				await reply.edit_text("Downloading...\nSize: {}\nETA: {}\nSpeed: {}\nProgress: {}".format(size, eta, speed, dots[percent]))
+			try:
+				if percent in dots.keys():
+					await reply.edit_text("Downloading...\nSize: {}\nETA: {}\nSpeed: {}\nProgress: {}".format(size, eta, speed, dots[percent]))
+			except: pass
 
 		try:
 			ret = await xdl.downloaders[args[0]](aria2client, args[1], temp_dir, download_callback)
