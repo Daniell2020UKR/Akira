@@ -131,8 +131,11 @@ builtins.sc2a_cache = {}
 
 def get_vid(url):
 	purl = urlparse(url)
-	if purl.query: return purl.query[2:]
-	else: return purl.path[1:]
+	if purl.query: vid = purl.query.split("&")[0][2:]
+	else: vid = purl.path[1:]
+
+	if len(vid) == 11: return vid
+	else: return None
 
 @dp.message_handler(commands=["start"], run_task=True)
 async def akira_start(message: types.Message):
@@ -242,17 +245,16 @@ async def akira_yt2a(message: types.Message):		# THIS SHIT DOESNT WORK HOW ITS S
 		dargs = {"format": "bestaudio[ext=m4a][filesize<?2000M]/bestaudio[ext=webm][filesize<?2000M]", "outtmpl": f"{download_dir}/audio-%(id)s.%(ext)s", "writethumbnail": True}
 		reply = await message.reply("Downloading...")
 		try:
-			vid = get_vid(args)
-			if not yt2a_cache.get(vid):
-				with YoutubeDL(dargs) as ydl:
-					audio_info = ydl.extract_info(args, download=False)
-					audio_id = audio_info["id"]
-					audio_ext = audio_info["ext"]
-					ydl.download([args])
-					if os.path.exists(f"{download_dir}/audio-{audio_id}.webp"):
-						thumbext = "webp"
-					else:
-						thumbext = "jpg"
+			audio_id = get_vid(args)
+			if audio_id:
+				if not yt2a_cache.get(audio_id):
+					with YoutubeDL(dargs) as ydl:
+						audio_info = ydl.extract_info(audio_id, download=False)
+						audio_ext = audio_info["ext"]
+						ydl.download([args])
+						if os.path.exists(f"{download_dir}/audio-{audio_id}.webp"): thumbext = "webp"
+						else: thumbext = "jpg"
+			else: raise Exception("This is here to trigger code below, because some monkey brain passed invalid Youtube link")
 		except:
 			await message.reply("Download error.")
 			await reply.delete()
@@ -261,10 +263,10 @@ async def akira_yt2a(message: types.Message):		# THIS SHIT DOESNT WORK HOW ITS S
 		await reply.edit_text("Uploading...")
 		chat = await client.get_entity(message.chat.id)
 		try:
-			if yt2a_cache.get(vid):
+			if yt2a_cache.get(audio_id):
 				await client.send_file(
 					chat,
-					yt2a_cache[vid],
+					yt2a_cache[audio_id],
 					reply_to=message.message_id
 				)
 			else:
