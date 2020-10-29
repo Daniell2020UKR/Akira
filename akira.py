@@ -152,15 +152,7 @@ async def akira_xdl(message: types.Message):		# Shitty fucking piss dickhead mot
 		reply = await message.reply("Downloading...\n[ {} ]".format(dots[0]))
 
 		async def download_callback(percent, eta, size, speed):
-			try:
-				await reply.edit_text("Downloading...\nSize: {}\nETA: {}\nSpeed: {}\n[ {} ]".format(size, eta, speed, dots[percent]))
-			except: pass
-
-		async def upload_callback(sent, total):
-			percent = int((sent / total) * 100)
-			try:
-				await reply.edit_text("Uploading...\n[ {} ]".format(dots[percent]))
-			except: pass
+			pass
 
 		try:
 			ret = await xdl.downloaders[args[0]](aria2client, args[1], temp_dir, download_callback)
@@ -220,12 +212,11 @@ async def akira_xdl(message: types.Message):		# Shitty fucking piss dickhead mot
 		else:
 			attrib = None
 
-		await reply.edit_text("Uploading...\n[ {} ]".format(dots[0]))
+		await reply.edit_text("Uploading...")
 		await client.send_file(
 			chat,
 			file=open(target, "rb"),
 			reply_to=telethon_message,
-			progress_callback=upload_callback,
 			attributes=attrib
 		)
 		await reply.delete()
