@@ -285,7 +285,7 @@ if __name__ == "__main__":
 
 	# Is this a good thing to do? I dont know.
 	log("Starting Aria2 daemon...")
-	aria2proc = subprocess.Popen(["aria2c", "--enable-rpc"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL)
+	aria2proc = subprocess.Popen(["aria2p", "--enable-rpc"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL)
 	time.sleep(1)
 
 	log("Creating Aria2 client...")
