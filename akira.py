@@ -17,7 +17,6 @@ akira_dir = os.getcwd() + "/akira"
 
 def log(text): print(f"[Akira] {text}")
 
-client = TelegramClient(MemorySession(), os.environ.get("API_ID"), os.environ.get("API_HASH")).start(bot_token=os.environ.get("BOT_TOKEN"))
 bot = Bot(token=os.environ.get("BOT_TOKEN"))
 dp = Dispatcher(bot, storage=MemoryStorage())
 
